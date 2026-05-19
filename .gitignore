@@ -1,0 +1,9 @@
+.deploy-config.json
+backend/
+node_modules/
+*.sh
+*.ps1
+*.js.bak
+*.md
+.DS_Store
+Thumbs.db

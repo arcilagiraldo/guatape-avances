@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juntos Construimos Guatapé 2024–2027 · Observatorio Municipal</title>
+<meta name="description" content="Observatorio de Gestión Pública — Alcaldía de Guatapé 2024-2027. Seguimiento al Plan de Desarrollo y Plan de Acción municipal.">
+<meta name="theme-color" content="#17272D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── Franja 4 colores bandera ── -->
+<div class="stripe-bandera">
+  <div class="s-azul"></div>
+  <div class="s-amarillo"></div>
+  <div class="s-verde"></div>
+  <div class="s-marino"></div>
+</div>
+
+<!-- ── Banner modo local ── -->
+<div id="bannerLocal" style="display:none;background:var(--azul);color:var(--marino);
+  text-align:center;padding:6px 1rem;font-size:11.5px;font-weight:500;
+  position:fixed;top:4px;left:0;right:0;z-index:1099;">
+  🔬 <strong>DATOS LOCALES</strong> — Datos reales Guatapé Q1 2026 &nbsp;
+  <span onclick="SETUP.abrirDesdeAdmin()" style="cursor:pointer;text-decoration:underline;font-weight:700;">
+    Conectar al servidor real →
+  </span>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand" style="display:flex;align-items:center;gap:0;flex-shrink:0">
+      <div class="nav-text">
+        <span class="nav-title" id="navTitulo">Juntos Construimos Guatapé</span>
+        <span class="nav-sub">2024–2027 · Observatorio municipal</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+      <button class="nav-btn" data-section="mapa">🗺️ Mapa</button>
+      <button class="nav-btn" data-section="logros">📈 Logros</button>
+      <button class="nav-btn" data-section="cuatrienio">🏁 Cuatrienio</button>
+      <button class="nav-btn" data-section="contratos">📋 Contratos</button>
+      <button class="nav-btn" data-section="biblioteca">📁 Biblioteca</button>
+      <button class="nav-btn" data-section="publica">👁️ Vista pública</button>
+      <button class="nav-btn admin-only hidden" data-section="admin">🔒 Admin</button>
+    </div>
+    <div class="nav-right">
+      <div class="badge-live">
+        <span class="dot-live"></span>
+        <span id="actualizacionTexto">Cargando...</span>
+      </div>
+      <button class="btn-admin-toggle" id="btnAdminToggle" title="Panel administrativo">⚙️</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Filtros globales ── -->
+<div class="filtros-bar">
+  <div class="filtros-inner">
+    <select class="filtro-select" id="filtroSecretaria"><option value="todas">Todas las secretarías</option></select>
+    <select class="filtro-select" id="filtroAnio">
+      <option value="todos">Todos los años</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026" selected>2026</option>
+      <option value="2027">2027</option>
+    </select>
+    <select class="filtro-select" id="filtroTrimestre">
+      <option value="todos">Todos los trimestres</option>
+      <option value="1">Q1 · Ene–Mar</option>
+      <option value="2">Q2 · Abr–Jun</option>
+      <option value="3">Q3 · Jul–Sep</option>
+      <option value="4">Q4 · Oct–Dic</option>
+    </select>
+    <button class="btn-filtrar" id="btnFiltrar">Actualizar</button>
+    <span class="filtro-resumen" id="filtroResumen"></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD EJECUTIVO                                        -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion active" id="sec-dashboard">
+  <div class="dashboard-grid" id="dashboardGrid">
+    <!-- Renderizado por dashboard.js -->
+    <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--texto-3)">
+      <div style="width:36px;height:36px;border:3px solid var(--azul);border-top-color:transparent;
+           border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px"></div>
+      <p style="font-size:13px">Cargando datos del municipio...</p>
+    </div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MAPA COMPLETO                                              -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-mapa">
+  <div class="mapa-wrap">
+    <div id="mapa"></div>
+    <div class="mapa-panel capas-panel">
+      <div class="panel-title">Capas del mapa</div>
+      <button class="capa-btn active" data-capa="osm">🗺️ Calles</button>
+      <button class="capa-btn"        data-capa="satellite">🛰️ Satélite</button>
+      <button class="capa-btn"        data-capa="topo">⛰️ Topográfico</button>
+      <button class="capa-btn"        data-capa="oscuro">🌙 Oscuro</button>
+    </div>
+    <div class="mapa-panel leyenda-panel">
+      <div class="panel-title">Veredas</div>
+      <div id="leyendaItems"></div>
+    </div>
+    <div class="mapa-panel programas-panel">
+      <div class="panel-title">Filtrar programa</div>
+      <div id="filtroIconos"></div>
+    </div>
+  </div>
+  <div class="beneficiario-popup hidden" id="beneficiarioPopup">
+    <button class="popup-close" id="popupClose">✕</button>
+    <div id="popupContenido"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- LOGROS                                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-logros">
+  <div class="contenido-wrap">
+    <div class="stats-globales" id="statsGlobales"></div>
+    <div class="secretarias-grid" id="secretariasGrid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- CUATRIENIO                                                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-cuatrienio">
+  <div class="contenido-wrap">
+    <div class="cuatrienio-hero"    id="cuatrienioHero"></div>
+    <div class="cuatrienio-detalle" id="cuatrienioDetalle"></div>
+    <div class="timeline-wrap"     id="timelineWrap"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- CONTRATOS                                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-contratos">
+  <div class="contenido-wrap">
+    <div class="contratos-stats" id="contratosStats"></div>
+    <input class="buscador" id="buscadorContratos" placeholder="🔍 Buscar contrato, secretaría, objeto, contratista...">
+    <div id="tablaContratos"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- BIBLIOTECA                                                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-biblioteca">
+  <div class="contenido-wrap">
+    <h2 class="seccion-titulo">Biblioteca de documentos</h2>
+    <p class="seccion-sub">Informes trimestrales, planes de acción y planes de desarrollo por secretaría</p>
+    <div class="biblioteca-grid" id="bibliotecaGrid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- VISTA PÚBLICA (ciudadanos)                                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-publica">
+  <!-- Hero -->
+  <div class="pub-hero">
+    <div style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(137,196,226,.45);margin-bottom:6px">
+      Alcaldía de Guatapé · Departamento de Antioquia
+    </div>
+    <div style="font-family:var(--font-d);font-size:1.8rem;font-weight:600;color:#fff;margin-bottom:4px">
+      Juntos Construimos Guatapé
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:1.25rem">
+      Plan de Desarrollo 2024–2027 · Transparencia y rendición de cuentas
+    </div>
+    <div class="pub-kpi-row" id="pubKpiRow">
+      <!-- Renderizado por dashboard.js -->
+    </div>
+  </div>
+  <!-- Logros resumidos para ciudadanos -->
+  <div class="pub-programas" id="pubProgramas">
+    <!-- Renderizado por dashboard.js -->
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ADMIN                                                      -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="seccion" id="sec-admin">
+
+  <!-- Login -->
+  <div class="admin-login" id="adminLogin">
+    <div class="login-card">
+      <div class="login-logo">🏛️</div>
+      <h2>Panel Administrativo</h2>
+      <p>Alcaldía de Guatapé — Acceso restringido</p>
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="loginUsuario" placeholder="Ej: admin_medioambiente" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" id="btnLogin" style="width:100%;margin-top:4px">Ingresar</button>
+      <div class="login-error hidden" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- Panel (visible solo tras login) -->
+  <div class="admin-panel hidden" id="adminPanel">
+    <div class="contenido-wrap">
+
+      <!-- Header -->
+      <div class="admin-header">
+        <div>
+          <h2 id="adminBienvenida">Panel de administración</h2>
+          <p  id="adminSecretaria"></p>
+        </div>
+        <button class="btn-secondary" id="btnLogout">Cerrar sesión</button>
+      </div>
+
+      <!-- Resumen BD -->
+      <div class="upload-section">
+        <h3>📈 Estado de la base de datos</h3>
+        <div class="admin-resumen-grid" id="adminResumenGrid">
+          <div class="admin-stat"><div class="n">—</div><div class="l">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- Selector secretaría (solo superadmin) -->
+      <div class="upload-section solo-superadmin" id="rowSecretaria" style="display:none">
+        <h3>🏛️ Secretaría a gestionar</h3>
+        <div class="form-group">
+          <select id="uploadSecretaria" style="width:100%;max-width:420px">
+            <option value="">— Selecciona una secretaría —</option>
+            <option value="medio_ambiente">🌿 Medio Ambiente y Desarrollo Rural</option>
+            <option value="gobierno">⚖️ Gobierno</option>
+            <option value="bienestar">🤝 Bienestar y Desarrollo Social</option>
+            <option value="turismo">🏔️ Turismo</option>
+            <option value="planeacion">📐 Planeación</option>
+            <option value="hacienda">💰 Hacienda</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tabs de carga -->
+      <div class="upload-section" style="padding-bottom:0">
+        <div class="admin-tabs">
+          <button class="admin-tab-btn" data-tab="tab-pd">📥 Plan de Desarrollo</button>
+          <button class="admin-tab-btn" data-tab="tab-pa">📥 Plan de Acción</button>
+          <button class="admin-tab-btn active" data-tab="tab-informe">📤 Informe trimestral</button>
+          <button class="admin-tab-btn" data-tab="tab-soportes">📋 Soportes</button>
+          <button class="admin-tab-btn" data-tab="tab-diagnostico">🔧 Diagnóstico</button>
+          <button class="admin-tab-btn" data-tab="tab-configuracion">⚙️ Configuración</button>
+          <button class="admin-tab-btn" data-tab="tab-historico">📦 Carga histórica</button>
+          <button class="admin-tab-btn" data-tab="tab-validacion">🔍 Validación</button>
+        </div>
+
+        <!-- TAB: Plan de Desarrollo -->
+        <div class="admin-tab-panel hidden" id="tab-pd" style="padding:1rem 0 1.5rem">
+          <p style="font-size:12px;color:var(--texto-2);margin-bottom:1rem;line-height:1.7">
+            Carga el <strong>Plan de Desarrollo 2024-2027</strong> una vez al inicio del cuatrienio.
+            Cada secretaría sube su propia hoja del Excel con los indicadores de producto PD.
+          </p>
+          <div class="dropzone" id="dropPD">
+            <div class="dropzone-icon">📊</div>
+            <div class="dropzone-text">
+              <strong>Excel Plan de Desarrollo (.xlsx)</strong>
+              <span>Hoja de esta secretaría con indicadores de producto</span>
+            </div>
+            <input type="file" accept=".xlsx,.xls" id="inputPD">
+            <div class="dropzone-nombre hidden" id="nombrePD"></div>
+          </div>
+          <button class="btn-primary btn-grande" id="btnCargarPD" disabled>📥 Cargar Plan de Desarrollo</button>
+          <div class="mini-terminal hidden" id="terminalPD"></div>
+        </div>
+
+        <!-- TAB: Plan de Acción -->
+        <div class="admin-tab-panel hidden" id="tab-pa" style="padding:1rem 0 1.5rem">
+          <p style="font-size:12px;color:var(--texto-2);margin-bottom:1rem;line-height:1.7">
+            Carga el <strong>Plan de Acción</strong> anual cada enero. Incluye programas, metas e indicadores del año vigente.
+          </p>
+          <div class="form-group" style="max-width:200px;margin-bottom:1rem">
+            <label>Año del Plan de Acción</label>
+            <select id="paAnio">
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+              <option value="2027">2027</option>
+            </select>
+          </div>
+          <div class="dropzone" id="dropPA">
+            <div class="dropzone-icon">📊</div>
+            <div class="dropzone-text">
+              <strong>Excel Plan de Acción (.xlsx)</strong>
+              <span>Hoja de esta secretaría con programas y metas del año</span>
+            </div>
+            <input type="file" accept=".xlsx,.xls" id="inputPA">
+            <div class="dropzone-nombre hidden" id="nombrePA"></div>
+          </div>
+          <button class="btn-primary btn-grande" id="btnCargarPA" disabled>📥 Cargar Plan de Acción</button>
+          <div class="mini-terminal hidden" id="terminalPA"></div>
+        </div>
+
+        <!-- TAB: Informe trimestral -->
+        <div class="admin-tab-panel" id="tab-informe" style="padding:1rem 0 1.5rem">
+          <p style="font-size:12px;color:var(--texto-2);margin-bottom:1rem;line-height:1.7">
+            Sube los <strong>informes técnicos del trimestre</strong>. Acepta <strong>uno o varios PDFs</strong> a la vez
+            (un PDF por programa o todos juntos). La IA extrae avances, beneficiarios y contratos automáticamente.
+          </p>
+          <div class="upload-row">
+            <div class="form-group">
+              <label>Año</label>
+              <select id="uploadAnio">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Trimestre</label>
+              <select id="uploadTrimestre">
+                <option value="1">Q1 · Enero–Marzo</option>
+                <option value="2">Q2 · Abril–Junio</option>
+                <option value="3">Q3 · Julio–Septiembre</option>
+                <option value="4">Q4 · Octubre–Diciembre</option>
+              </select>
+            </div>
+          </div>
+          <div class="dropzone" id="dropInformes">
+            <div class="dropzone-icon">📄</div>
+            <div class="dropzone-text">
+              <strong>Informes técnicos PDF — uno o varios</strong>
+              <span>Arrastra aquí o haz clic · Puedes seleccionar múltiples archivos</span>
+            </div>
+            <input type="file" accept=".pdf" id="inputInformes" multiple>
+            <div class="dropzone-nombre hidden" id="nombreInformes"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-primary btn-grande" id="btnSubirInformes" disabled style="flex:3">
+              🚀 Procesar informes con IA
+            </button>
+            <button class="btn-danger" id="btnEliminarPeriodo" style="flex:1;padding:12px;font-size:12.5px" title="Eliminar datos del período">
+              🗑️ Limpiar período
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: Soportes -->
+        <div class="admin-tab-panel hidden" id="tab-soportes" style="padding:1rem 0 1.5rem">
+          <p style="font-size:12px;color:var(--texto-2);margin-bottom:1rem;line-height:1.7">
+            Sube <strong>informes ejecutivos de contratos</strong> adicionales. La IA extrae número, objeto y valor de cada contrato.
+          </p>
+          <div style="background:var(--amarillo-50);border:.5px solid var(--amarillo);border-radius:8px;
+               padding:9px 12px;font-size:12px;color:#7a6a00;margin-bottom:1rem">
+            💡 Los contratos del informe principal ya se extraen automáticamente. Usa esta pestaña solo para soportes adicionales.
+          </div>
+          <div class="dropzone" id="dropSoportes">
+            <div class="dropzone-icon">📋</div>
+            <div class="dropzone-text">
+              <strong>Soportes de contratos PDF — uno o varios</strong>
+              <span>Arrastra aquí o haz clic · Múltiples archivos permitidos</span>
+            </div>
+            <input type="file" accept=".pdf" id="inputSoportes" multiple>
+            <div class="dropzone-nombre hidden" id="nombreSoportes"></div>
+          </div>
+          <button class="btn-primary btn-grande" id="btnSubirSoportes" disabled>
+            📋 Procesar soportes con IA
+          </button>
+          <div class="mini-terminal hidden" id="terminalSoportes"></div>
+        </div>
+
+        <!-- TAB: Diagnóstico -->
+        <div class="admin-tab-panel hidden" id="tab-diagnostico" style="padding:1rem 0 1.5rem">
+          <p style="font-size:12px;color:var(--texto-2);margin-bottom:1rem;line-height:1.7">
+            Verifica la conexión y el estado del servidor en tiempo real.
+          </p>
+          <button onclick="SETUP.abrirDesdeAdmin()" style="
+            width:100%;background:var(--marino);color:var(--azul);border:none;
+            border-radius:8px;padding:12px;font-size:13px;font-weight:500;
+            cursor:pointer;margin-bottom:12px;display:flex;align-items:center;
+            justify-content:center;gap:8px;font-family:var(--font-s)">
+            ⚙️ Asistente de configuración / Cambiar URL del backend
+          </button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:1rem">
+            <button class="btn-secondary" onclick="DIAGNOSTICO.verificarConexion()" style="font-size:12px">🔌 Verificar conexión</button>
+            <button class="btn-secondary" onclick="DIAGNOSTICO.verificarInstalacion()" style="font-size:12px">✅ Estado instalación</button>
+            <button class="btn-secondary" onclick="DIAGNOSTICO.verEstadoDB()" style="font-size:12px">🗄️ Estado base de datos</button>
+            <button class="btn-secondary" onclick="SETUP.mostrarGuiaGitHub()" style="font-size:12px">📡 Guía GitHub Pages</button>
+          </div>
+          <div style="background:#0D1117;border-radius:8px;padding:12px;
+               font-family:monospace;font-size:11.5px;color:#8B949E;
+               min-height:120px;max-height:280px;overflow-y:auto" id="diagnosticoLog">
+            <span style="color:#3FB950">▶</span> Consola lista. Haz clic en un botón para diagnosticar.<br>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn-secondary" onclick="document.getElementById('diagnosticoLog').innerHTML='<span style=color:#3FB950>▶</span> Consola limpiada.<br>'" style="font-size:11px">🧹 Limpiar</button>
+            <button class="btn-secondary" onclick="DIAGNOSTICO.copiarLog()" style="font-size:11px">📋 Copiar</button>
+          </div>
+        </div>
+
+
+        <!-- TAB: Configuración -->
+        <div class="admin-tab-panel hidden" id="tab-configuracion" style="padding:1rem 0 1.5rem">
+          <!-- Renderizado dinámicamente por configuracion.js -->
+          <div style="text-align:center;padding:2rem;color:var(--texto-3)">
+            <div style="width:28px;height:28px;border:2px solid var(--azul);border-top-color:transparent;
+                 border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px"></div>
+            Cargando panel de configuración...
+          </div>
+        </div>
+
+
+        <!-- TAB: Carga histórica masiva -->
+        <div class="admin-tab-panel hidden" id="tab-historico" style="padding:1rem 0 1.5rem">
+
+          <div style="background:var(--azul-50);border:.5px solid var(--azul);border-radius:var(--radio);
+               padding:12px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--azul-dark);line-height:1.7">
+            <strong>📦 Carga de información histórica</strong><br>
+            Usa esta pestaña para cargar múltiples informes de trimestres pasados de una sola vez.
+            Los archivos se procesan <strong>uno por uno</strong> automáticamente —
+            puedes seleccionar todos y la app se encarga del resto.
+          </div>
+
+          <!-- Selector secretaría + período + tipo -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:1rem">
+            <div class="form-group">
+              <label>Secretaría</label>
+              <select id="hSecretaria" onchange="document.getElementById('uploadSecretaria').value=this.value">
+                <option value="">— Selecciona —</option>
+                <option value="medio_ambiente">🌿 Medio Ambiente</option>
+                <option value="gobierno">⚖️ Gobierno</option>
+                <option value="bienestar">🤝 Bienestar</option>
+                <option value="turismo">🏔️ Turismo</option>
+                <option value="planeacion">📐 Planeación</option>
+                <option value="hacienda">💰 Hacienda</option>
+                <option value="todas">🏛️ Varias (ver nota)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año</label>
+              <select id="hAnio">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Trimestre</label>
+              <select id="hTrimestre">
+                <option value="1">Q1 · Ene–Mar</option>
+                <option value="2">Q2 · Abr–Jun</option>
+                <option value="3">Q3 · Jul–Sep</option>
+                <option value="4">Q4 · Oct–Dic</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de archivos</label>
+              <select id="hTipo">
+                <option value="informe_pdf">📄 Informes PDF</option>
+                <option value="soporte_pdf">📋 Soportes PDF</option>
+                <option value="plan_pd">📊 Plan Desarrollo</option>
+                <option value="plan_pa">📊 Plan Acción</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background:var(--amarillo-50);border:.5px solid var(--amarillo);border-radius:8px;
+               padding:9px 12px;font-size:11.5px;color:#8a7000;margin-bottom:1rem">
+            💡 <strong>Nota sobre períodos múltiples:</strong> si tienes informes de varios trimestres,
+            primero sube los del Q1, luego Q2, etc. Cada lote procesará todos los archivos con
+            el mismo período. Para cambiar de período o secretaría, usa el formulario de arriba.
+          </div>
+
+          <!-- Dropzone grande para múltiples archivos -->
+          <div class="dropzone" id="dropHistorico" style="min-height:120px;margin-bottom:10px">
+            <div class="dropzone-icon">📦</div>
+            <div class="dropzone-text">
+              <strong>Selecciona todos los archivos del lote</strong>
+              <span>Arrastra aquí o haz clic · Sin límite de cantidad ni tamaño · Se procesan uno por uno</span>
+            </div>
+            <input type="file" id="inputHistorico" multiple accept=".pdf,.xlsx,.xls">
+          </div>
+
+          <!-- Lista de archivos seleccionados -->
+          <div id="listaHistorico" style="margin-bottom:12px"></div>
+
+          <!-- Botón de inicio -->
+          <button class="btn-primary btn-grande" id="btnIniciarHistorico" disabled
+            style="background:var(--marino);color:var(--azul)">
+            🚀 Iniciar carga masiva
+          </button>
+
+          <div style="margin-top:14px;background:var(--marino-50);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--texto-2)">
+            <strong>¿Cómo funciona?</strong>
+            <ol style="margin:6px 0 0 1.2rem;line-height:2">
+              <li>Selecciona la secretaría, año, trimestre y tipo de archivos</li>
+              <li>Arrastra o selecciona todos los PDFs o Excels del lote</li>
+              <li>Haz clic en "Iniciar carga masiva"</li>
+              <li>La app procesa uno por uno mostrando el progreso en tiempo real</li>
+              <li>Al final ves un resumen con éxitos y errores</li>
+            </ol>
+          </div>
+
+        </div>
+
+
+        <!-- TAB: Validación -->
+        <div class="admin-tab-panel hidden" id="tab-validacion" style="padding:1rem 0 1.5rem">
+          <!-- Renderizado por validacion.js -->
+          <div style="text-align:center;padding:2rem;color:var(--texto-3)">
+            <div style="font-size:32px;margin-bottom:8px;opacity:.4">🔍</div>
+            <div style="font-size:12px">Haz clic en el tab para cargar el panel de validación</div>
+          </div>
+        </div>
+
+      </div><!-- /tabs -->
+
+      <!-- Terminal IA -->
+      <div class="ia-proceso hidden" id="iaProceso">
+        <h3>🤖 Procesando con Inteligencia Artificial</h3>
+        <div class="ia-terminal" id="iaTerminal"></div>
+        <div class="ia-progreso"><div class="ia-barra" id="iaBarra"></div></div>
+      </div>
+      <div class="ia-resultado hidden" id="iaResultado"></div>
+
+      <!-- Historial -->
+      <div class="upload-section">
+        <h3>📋 Historial de procesos</h3>
+        <div id="historialLista">
+          <div class="empty-state"><div class="empty-state-desc">Cargando historial...</div></div>
+        </div>
+      </div>
+
+      <!-- Editor mapa -->
+      <div class="editor-section">
+        <h3>📍 Editar ubicaciones en mapa</h3>
+        <p style="font-size:12px;color:var(--texto-2);margin-bottom:10px">
+          Arrastra los marcadores para corregir la ubicación exacta de los beneficiarios.
+        </p>
+        <div class="mapa-editor-wrap">
+          <div id="mapaEditor"></div>
+          <div class="editor-sidebar" id="editorSidebar">
+            <div class="editor-placeholder">
+              <span>👆</span>
+              <p>Selecciona un punto en el mapa para editar su ubicación</p>
+            </div>
+          </div>
+        </div>
+        <button class="btn-secondary" id="btnAgregarBenef" style="margin-top:10px">+ Agregar beneficiario manualmente</button>
+      </div>
+
+    </div>
+  </div><!-- /adminPanel -->
+</section>
+
+<!-- ── Nav mobile ── -->
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-btn active" data-section="dashboard"><span class="ico">📊</span>Dashboard</button>
+  <button class="mobile-nav-btn"        data-section="mapa">     <span class="ico">🗺️</span>Mapa</button>
+  <button class="mobile-nav-btn"        data-section="logros">   <span class="ico">📈</span>Logros</button>
+  <button class="mobile-nav-btn"        data-section="contratos"><span class="ico">📋</span>Contratos</button>
+  <button class="mobile-nav-btn"        data-section="publica">  <span class="ico">👁️</span>Público</button>
+</nav>
+
+<div class="toast hidden" id="toast"></div>
+
+<!-- ── Footer ── -->
+<footer class="footer-institucional">
+  <span id="footerGobierno">Alcaldía de Guatapé</span> · Departamento de Antioquia ·
+  NIT <span id="footerNIT">890 983 830-3</span> ·
+  <a href="https://municipiodeguatape.gov.co" target="_blank" rel="noopener" id="footerWeb">municipiodeguatape.gov.co</a>
+  <span style="display:block;margin-top:2px;font-size:10px;color:rgba(137,196,226,.25)">
+    Transparencia y rendición de cuentas · Plan de Desarrollo 2024–2027
+  </span>
+</footer>
+
+<!-- ── Scripts (orden importa) ── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/datos_iniciales.js"></script>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/mapa.js"></script>
+<script src="js/logros.js"></script>
+<script src="js/cuatrienio.js"></script>
+<script src="js/contratos.js"></script>
+<script src="js/biblioteca.js"></script>
+<script src="js/setup.js"></script>
+<script src="js/diagnostico.js"></script>
+<script src="js/configuracion.js"></script>
+<script src="js/validacion.js"></script>
+<script src="js/carga-masiva.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+// Mini-terminales se revelan solas al recibir contenido
+document.querySelectorAll('.mini-terminal').forEach(t => {
+  new MutationObserver(() => t.classList.remove('hidden')).observe(t, { childList: true });
+});
+</script>
+</body>
+</html>
