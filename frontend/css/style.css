@@ -888,6 +888,12 @@ body {
   background: rgba(255,255,255,.08); color: #fff;
   font-family: var(--font-s); font-size: 13px;
 }
+.rol-login-form input:focus {
+  outline: none;
+  border-color: rgba(137,196,226,.6);
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}
 .rol-login-form input::placeholder { color: rgba(255,255,255,.25); }
 .rol-login-title {
   font-size: 15px; font-weight: 600; color: var(--azul);
