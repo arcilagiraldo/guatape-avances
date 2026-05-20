@@ -231,6 +231,31 @@ const DIAGNOSTICO = {
       APP.toast("❌ Error: " + r.error, "error");
     }
     btn.textContent = original; btn.disabled = false;
+  },
+
+  async normalizarVeredas(btn) {
+    if (!confirm("¿Normalizar los nombres de veredas en toda la base de datos?\n\nEsto corregirá nombres como 'El Placer', 'La Granada', 'El Rosario' y los unificará con las 8 veredas oficiales de Guatapé.")) return;
+    const original = btn.textContent;
+    btn.textContent = "⏳ Normalizando..."; btn.disabled = true;
+    this._limpiar();
+    this._log("NORMALIZANDO VEREDAS EN SHEETS", "titulo");
+    if (API._esModoLocal()) {
+      this._log("Esta función requiere conexión al servidor real.", "warn");
+      btn.textContent = original; btn.disabled = false;
+      return;
+    }
+    const r = await API.post({ action: "normalizar_veredas" });
+    if (r.ok) {
+      this._log(r.msg || "Normalización completada", "ok");
+      if (r.detalle) r.detalle.forEach(d => this._log("  • " + d, "info"));
+      this._log("Recarga los datos para ver los cambios.", "info");
+      APP.cargarDatos();
+      APP.toast("✅ " + r.msg);
+    } else {
+      this._log("Error: " + r.error, "error");
+      APP.toast("❌ Error: " + r.error, "error");
+    }
+    btn.textContent = original; btn.disabled = false;
   }
 };
 
