@@ -12,7 +12,7 @@ const APP_CONFIG = {
   // │  PASO 1 — URL del backend (Apps Script)                    │
   // │  Pega aquí la URL que te dio Apps Script al implementar    │
   // └─────────────────────────────────────────────────────────────┘
-  API_URL: "https://script.google.com/macros/s/PEGA_AQUI_TU_URL/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbxXv6Q08lWcNiVz6LEauVONJiBUWL9hYxdCn_Ac3vlx4PyxcJrukfu89vFSEyhJBuDoPg/exec",
 
   // ┌─────────────────────────────────────────────────────────────┐
   // │  PASO 2 — Identidad del municipio                          │
