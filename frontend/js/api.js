@@ -52,15 +52,19 @@ const API = {
         { id:"hacienda",       nombre:"Sec. de Hacienda",                        color:"#2D6A4F", icono:"💰" },
       ],
       veredas: {
-        "El Rosario":{"lat":6.2312,"lng":-75.1687,"color":"#E74C3C"},
-        "Quebrada Arriba":{"lat":6.2445,"lng":-75.1823,"color":"#E67E22"},
-        "La Piedra":{"lat":6.2389,"lng":-75.1534,"color":"#F39C12"},
-        "La Sonadora":{"lat":6.2156,"lng":-75.1612,"color":"#2ECC71"},
-        "La Peña":{"lat":6.2478,"lng":-75.1723,"color":"#3498DB"},
-        "Los Naranjos":{"lat":6.2534,"lng":-75.1456,"color":"#9B59B6"},
-        "El Roble":{"lat":6.2201,"lng":-75.1789,"color":"#1ABC9C"},
-        "Santa Rita":{"lat":6.2623,"lng":-75.1634,"color":"#E91E63"},
-        "Urbano":{"lat":6.2321,"lng":-75.1567,"color":"#34495E"}
+        "El Rosario":      {"lat":6.2112,"lng":-75.1654,"color":"#E74C3C"},
+        "Quebrada Arriba": {"lat":6.2467,"lng":-75.1678,"color":"#E67E22"},
+        "La Piedra":       {"lat":6.2198,"lng":-75.1457,"color":"#F39C12"},
+        "La Sonadora":     {"lat":6.2045,"lng":-75.1598,"color":"#2ECC71"},
+        "La Peña":         {"lat":6.2089,"lng":-75.1748,"color":"#3498DB"},
+        "Los Naranjos":    {"lat":6.2345,"lng":-75.1912,"color":"#9B59B6"},
+        "El Roble":        {"lat":6.2512,"lng":-75.1523,"color":"#1ABC9C"},
+        "Santa Rita":      {"lat":6.2678,"lng":-75.1534,"color":"#E91E63"},
+        "El Placer":       {"lat":6.2234,"lng":-75.1845,"color":"#FF5722"},
+        "La Granada":      {"lat":6.2167,"lng":-75.1712,"color":"#795548"},
+        "San Miguel":      {"lat":6.2389,"lng":-75.1834,"color":"#607D8B"},
+        "La Quiebra":      {"lat":6.2723,"lng":-75.1645,"color":"#FF9800"},
+        "Urbano":          {"lat":6.2321,"lng":-75.1567,"color":"#34495E"}
       },
       iconos: {
         forestal:{"emoji":"🌳","label":"Conservación forestal"},
@@ -123,7 +127,19 @@ const API = {
   async getConfig() {
     if (this._config) return this._config;
     const r = await this.get({ action: "config" });
-    if (r.ok) this._config = r;
+    if (r.ok) {
+      // Mezclar coordenadas de veredas corregidas desde localStorage
+      const ov = localStorage.getItem("gt_veredas_override");
+      if (ov && r.veredas) {
+        try {
+          const overrides = JSON.parse(ov);
+          Object.entries(overrides).forEach(([n, v]) => {
+            if (r.veredas[n]) r.veredas[n] = { ...r.veredas[n], ...v };
+          });
+        } catch (_) {}
+      }
+      this._config = r;
+    }
     return r;
   },
   async getDatos(f = {}) {

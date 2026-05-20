@@ -90,6 +90,9 @@ const CONFIG_APP = {
   init() {
     const cfg = this.cargar();
     this.aplicar(cfg);
+    // Aplicar escudo guardado
+    const escudo = localStorage.getItem("gt_escudo");
+    if (escudo) this._aplicarEscudo(escudo);
   },
 
   // Oscurecer color hex
@@ -130,6 +133,36 @@ const CONFIG_APP = {
             </button>
           </div>
           <div id="cfg_url_status" style="margin-top:8px;font-size:11px;display:none"></div>
+        </div>
+
+        <!-- Escudo / Logo -->
+        <div style="background:#fff;border:.5px solid var(--borde);border-radius:var(--radio);padding:1rem;margin-bottom:1.25rem">
+          <div style="font-size:12.5px;font-weight:500;color:var(--marino);margin-bottom:4px">🛡️ Escudo / Logo del municipio</div>
+          <div style="font-size:11px;color:var(--texto-2);margin-bottom:12px">Se mostrará en la barra de navegación y en la pantalla de inicio de sesión.</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+            <div id="escudoPreview" style="width:72px;height:72px;border-radius:50%;background:var(--marino);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;border:2px solid var(--borde)">
+              ${localStorage.getItem("gt_escudo") ? `<img src="${localStorage.getItem("gt_escudo")}" style="width:100%;height:100%;object-fit:contain;padding:4px">` : "🏛️"}
+            </div>
+            <div style="flex:1">
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <button class="btn-primary" onclick="CONFIG_APP._clickSubirEscudo()" style="font-size:12px;flex:1">
+                  📤 Subir imagen
+                </button>
+                <button class="btn-secondary" onclick="CONFIG_APP._quitarEscudo()" style="font-size:12px">
+                  ✕ Quitar
+                </button>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>O pega la URL de la imagen</label>
+                <div style="display:flex;gap:6px">
+                  <input type="url" id="escudoUrlInput" placeholder="https://..." value="${localStorage.getItem('gt_escudo_url') || ''}" style="font-size:11.5px">
+                  <button class="btn-secondary" onclick="CONFIG_APP._usarUrlEscudo()" style="font-size:12px;flex-shrink:0;padding:0 10px">Usar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="escudoFileInput" accept="image/*" style="display:none" onchange="CONFIG_APP._procesarEscudo(this)">
+          <div id="escudoMsg" style="display:none;font-size:11px;border-radius:6px;padding:6px 10px"></div>
         </div>
 
         <!-- Identidad del municipio -->
@@ -262,6 +295,39 @@ const CONFIG_APP = {
           <div style="font-size:11px;color:var(--texto-3);margin-top:4px">
             💡 Puedes encontrar las coordenadas en Google Maps haciendo clic derecho sobre el municipio.
           </div>
+        </div>
+
+        <!-- Editor de coordenadas de veredas -->
+        <div style="background:#fff;border:.5px solid var(--borde);border-radius:var(--radio);padding:1rem;margin-bottom:1.25rem">
+          <div style="font-size:12.5px;font-weight:500;color:var(--marino);margin-bottom:4px">📍 Coordenadas de veredas</div>
+          <div style="font-size:11px;color:var(--texto-2);margin-bottom:10px">
+            Corrige la posición de cada vereda en el mapa. Los valores se guardan localmente.<br>
+            <strong>Tip:</strong> Busca la vereda en Google Maps, haz clic derecho → copia latitud y longitud.
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:11.5px" id="tablaVeredas">
+              <thead>
+                <tr style="background:var(--marino);color:#fff">
+                  <th style="padding:7px 10px;text-align:left;font-weight:500;border-radius:6px 0 0 0">Vereda</th>
+                  <th style="padding:7px 10px;text-align:left;font-weight:500">Latitud</th>
+                  <th style="padding:7px 10px;text-align:left;font-weight:500">Longitud</th>
+                  <th style="padding:7px 10px;text-align:left;font-weight:500;border-radius:0 6px 0 0">Color</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${CONFIG_APP._filaVeredas()}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn-primary" onclick="CONFIG_APP._guardarVeredas()" style="font-size:12px;flex:1">
+              💾 Guardar coordenadas de veredas
+            </button>
+            <button class="btn-secondary" onclick="CONFIG_APP._resetVeredas()" style="font-size:12px">
+              ↩️ Restablecer
+            </button>
+          </div>
+          <div id="verMsg" style="display:none;font-size:11px;border-radius:6px;padding:6px 10px;margin-top:8px"></div>
         </div>
 
         <!-- Botones de acción -->
@@ -418,5 +484,143 @@ const CONFIG_APP = {
     el.style.cssText = `display:block;border-radius:8px;padding:9px 12px;font-size:12px;${estilos[tipo]||estilos.ok}`;
     el.textContent = msg;
     if (tipo === "ok") setTimeout(() => el.style.display = "none", 4000);
+  },
+
+  // ── ESCUDO / LOGO ─────────────────────────────────────────────
+  _aplicarEscudo(src) {
+    const nav = document.getElementById("navEscudo");
+    if (nav) { nav.src = src; nav.style.display = "block"; }
+    const rol = document.getElementById("rolEscudo");
+    if (rol) rol.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:contain;border-radius:50%">`;
+  },
+
+  _quitarEscudo() {
+    localStorage.removeItem("gt_escudo");
+    localStorage.removeItem("gt_escudo_url");
+    const nav = document.getElementById("navEscudo");
+    if (nav) { nav.src = ""; nav.style.display = "none"; }
+    const rol = document.getElementById("rolEscudo");
+    if (rol) rol.innerHTML = "🏛️";
+    const prev = document.getElementById("escudoPreview");
+    if (prev) prev.innerHTML = "🏛️";
+    this._msgEscudo("Escudo eliminado.", "ok");
+  },
+
+  _clickSubirEscudo() {
+    document.getElementById("escudoFileInput")?.click();
+  },
+
+  _procesarEscudo(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 300 * 1024) {
+      this._msgEscudo("⚠️ Imagen muy grande (+300 KB). Usa una versión reducida o pega la URL.", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const src = e.target.result;
+      localStorage.setItem("gt_escudo", src);
+      this._aplicarEscudo(src);
+      const prev = document.getElementById("escudoPreview");
+      if (prev) prev.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:contain;padding:4px">`;
+      this._msgEscudo("✅ Escudo cargado correctamente.", "ok");
+    };
+    reader.readAsDataURL(file);
+  },
+
+  _usarUrlEscudo() {
+    const url = document.getElementById("escudoUrlInput")?.value?.trim();
+    if (!url || !url.startsWith("http")) {
+      this._msgEscudo("❌ Ingresa una URL válida.", "error"); return;
+    }
+    localStorage.setItem("gt_escudo", url);
+    localStorage.setItem("gt_escudo_url", url);
+    this._aplicarEscudo(url);
+    const prev = document.getElementById("escudoPreview");
+    if (prev) prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:contain;padding:4px">`;
+    this._msgEscudo("✅ Escudo aplicado desde URL.", "ok");
+  },
+
+  _msgEscudo(txt, tipo) {
+    const el = document.getElementById("escudoMsg");
+    if (!el) return;
+    el.style.cssText = `display:block;font-size:11px;border-radius:6px;padding:6px 10px;${
+      tipo === "ok" ? "background:var(--verde-50);color:var(--verde)" : "background:var(--rojo-50);color:var(--rojo)"
+    }`;
+    el.textContent = txt;
+    if (tipo === "ok") setTimeout(() => el.style.display = "none", 3000);
+  },
+
+  // ── VEREDAS ───────────────────────────────────────────────────
+  _verDefaults: {
+    "El Rosario":      { lat: 6.2112, lng: -75.1654, color: "#E74C3C" },
+    "Quebrada Arriba": { lat: 6.2467, lng: -75.1678, color: "#E67E22" },
+    "La Piedra":       { lat: 6.2198, lng: -75.1457, color: "#F39C12" },
+    "La Sonadora":     { lat: 6.2045, lng: -75.1598, color: "#2ECC71" },
+    "La Peña":         { lat: 6.2089, lng: -75.1748, color: "#3498DB" },
+    "Los Naranjos":    { lat: 6.2345, lng: -75.1912, color: "#9B59B6" },
+    "El Roble":        { lat: 6.2512, lng: -75.1523, color: "#1ABC9C" },
+    "Santa Rita":      { lat: 6.2678, lng: -75.1534, color: "#E91E63" },
+    "El Placer":       { lat: 6.2234, lng: -75.1845, color: "#FF5722" },
+    "La Granada":      { lat: 6.2167, lng: -75.1712, color: "#795548" },
+    "San Miguel":      { lat: 6.2389, lng: -75.1834, color: "#607D8B" },
+    "La Quiebra":      { lat: 6.2723, lng: -75.1645, color: "#FF9800" },
+    "Urbano":          { lat: 6.2321, lng: -75.1567, color: "#34495E" },
+  },
+
+  _getVeredas() {
+    const saved = localStorage.getItem("gt_veredas_override");
+    const override = saved ? JSON.parse(saved) : {};
+    const merged = { ...this._verDefaults };
+    Object.entries(override).forEach(([n, v]) => { if (merged[n]) merged[n] = { ...merged[n], ...v }; });
+    return merged;
+  },
+
+  _filaVeredas() {
+    const ver = this._getVeredas();
+    return Object.entries(ver).map(([nombre, v]) => `
+      <tr style="border-bottom:.5px solid var(--borde)">
+        <td style="padding:6px 10px;font-weight:500;color:var(--marino);white-space:nowrap">${nombre}</td>
+        <td style="padding:4px 6px">
+          <input type="number" step="0.0001" data-ver="${nombre}" data-campo="lat" value="${v.lat}"
+            style="width:100px;font-family:monospace;font-size:11px;padding:4px 6px;border:.5px solid var(--borde);border-radius:5px;background:#f9f9f9">
+        </td>
+        <td style="padding:4px 6px">
+          <input type="number" step="0.0001" data-ver="${nombre}" data-campo="lng" value="${v.lng}"
+            style="width:110px;font-family:monospace;font-size:11px;padding:4px 6px;border:.5px solid var(--borde);border-radius:5px;background:#f9f9f9">
+        </td>
+        <td style="padding:4px 6px">
+          <input type="color" data-ver="${nombre}" data-campo="color" value="${v.color}"
+            style="width:44px;height:28px;border:none;border-radius:5px;cursor:pointer;padding:2px">
+        </td>
+      </tr>`).join("");
+  },
+
+  _guardarVeredas() {
+    const tabla = document.getElementById("tablaVeredas");
+    if (!tabla) return;
+    const override = {};
+    tabla.querySelectorAll("input[data-ver]").forEach(inp => {
+      const v = inp.dataset.ver, c = inp.dataset.campo;
+      if (!override[v]) override[v] = {};
+      override[v][c] = c === "color" ? inp.value : parseFloat(inp.value);
+    });
+    localStorage.setItem("gt_veredas_override", JSON.stringify(override));
+    // Invalidar cache de config para que el mapa tome las nuevas coords
+    if (typeof API !== "undefined") { API._config = null; API._cache = {}; }
+    const el = document.getElementById("verMsg");
+    if (el) {
+      el.style.cssText = "display:block;font-size:11px;border-radius:6px;padding:6px 10px;background:var(--verde-50);color:var(--verde)";
+      el.textContent = "✅ Coordenadas guardadas. Recarga el mapa para ver los cambios.";
+      setTimeout(() => el.style.display = "none", 4000);
+    }
+  },
+
+  _resetVeredas() {
+    if (!confirm("¿Restablecer todas las coordenadas de veredas a los valores predeterminados?")) return;
+    localStorage.removeItem("gt_veredas_override");
+    if (typeof API !== "undefined") { API._config = null; API._cache = {}; }
+    this.renderPanel();
   }
 };
