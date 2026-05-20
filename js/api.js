@@ -12,11 +12,28 @@ const API = {
     return !APP_CONFIG.API_URL || APP_CONFIG.API_URL.includes("PEGA_AQUI");
   },
 
+  _filtrarLocal(d, p) {
+    const sec  = p.secretaria && p.secretaria !== "todas"  ? p.secretaria : null;
+    const anio = p.anio       && p.anio       !== "todos"  ? String(p.anio) : null;
+    const trim = p.trimestre  && p.trimestre  !== "todos"  ? String(p.trimestre) : null;
+    if (!sec && !anio && !trim) return d;
+    const filtrar = arr => (arr || []).filter(x =>
+      (!sec  || x.secretaria === sec)  &&
+      (!anio || String(x.anio) === anio) &&
+      (!trim || String(x.trimestre) === trim)
+    );
+    return { ...d,
+      programas:     filtrar(d.programas),
+      beneficiarios: filtrar(d.beneficiarios),
+      contratos:     filtrar(d.contratos),
+    };
+  },
+
   async get(p = {}) {
     // ── DATOS LOCALES: usa datos locales si la URL no está configurada ──
     if (this._esModoLocal()) {
       if (typeof DATOS_INICIALES === "undefined") return { ok: false, error: "Sin URL de API configurada." };
-      if (!p.action || p.action === "datos")  return DATOS_INICIALES;
+      if (!p.action || p.action === "datos")  return this._filtrarLocal(DATOS_INICIALES, p);
       if (p.action === "config")              return API._configDemo();
       return { ok: true };
     }
@@ -52,18 +69,14 @@ const API = {
         { id:"hacienda",       nombre:"Sec. de Hacienda",                        color:"#2D6A4F", icono:"💰" },
       ],
       veredas: {
-        "El Rosario":      {"lat":6.1953,"lng":-75.1632,"color":"#E74C3C"},
-        "Quebrada Arriba": {"lat":6.2672,"lng":-75.1792,"color":"#E67E22"},
-        "La Piedra":       {"lat":6.2218,"lng":-75.1432,"color":"#F39C12"},
         "La Sonadora":     {"lat":6.1987,"lng":-75.1779,"color":"#2ECC71"},
         "La Peña":         {"lat":6.2198,"lng":-75.1953,"color":"#3498DB"},
+        "La Piedra":       {"lat":6.2218,"lng":-75.1432,"color":"#F39C12"},
+        "Quebrada Arriba": {"lat":6.2672,"lng":-75.1792,"color":"#E67E22"},
         "Los Naranjos":    {"lat":6.2549,"lng":-75.1934,"color":"#9B59B6"},
         "El Roble":        {"lat":6.2573,"lng":-75.1648,"color":"#1ABC9C"},
+        "El Tronco":       {"lat":6.1953,"lng":-75.1632,"color":"#E74C3C"},
         "Santa Rita":      {"lat":6.2741,"lng":-75.1573,"color":"#E91E63"},
-        "El Placer":       {"lat":6.2378,"lng":-75.2073,"color":"#FF5722"},
-        "La Granada":      {"lat":6.2098,"lng":-75.1701,"color":"#795548"},
-        "San Miguel":      {"lat":6.2441,"lng":-75.1887,"color":"#607D8B"},
-        "La Quiebra":      {"lat":6.2821,"lng":-75.1712,"color":"#FF9800"},
         "Urbano":          {"lat":6.2321,"lng":-75.1567,"color":"#34495E"}
       },
       iconos: {

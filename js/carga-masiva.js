@@ -143,7 +143,12 @@ const CARGA_MASIVA = {
         if (resultado.log) {
           resultado.log
             .filter(l => l.estado !== "procesando")
-            .forEach(l => this._log(`      ${l.estado==="ok"?"✓":"→"} ${l.msg}`, l.estado==="ok"?"ok":"info"));
+            .forEach(l => this._log(`      ${l.estado==="ok"?"✓":l.estado==="warn"?"⚠":"→"} ${l.msg}`, l.estado==="ok"?"ok":l.estado==="warn"?"warn":"info"));
+        }
+        // Alertar sobre veredas no reconocidas
+        if (resultado.veredas_no_reconocidas?.length) {
+          this._log(`   ⚠️ Veredas no reconocidas — asignadas temporalmente a "Urbano": ${resultado.veredas_no_reconocidas.join(", ")}`, "warn");
+          this._log(`      Corrígelas en el mapa editando la vereda del beneficiario.`, "info");
         }
       } else {
         const error = resultado.error || "Error desconocido";
