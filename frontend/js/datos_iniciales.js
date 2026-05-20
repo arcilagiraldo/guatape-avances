@@ -4251,6 +4251,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 4600018014 · SCI-461-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 45,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4266,6 +4267,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 4600018014 · SCI-349-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 30,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4281,6 +4283,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 4600018014 · SCI-442-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 30,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4296,6 +4299,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 4600018014 · SCI-435-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 35,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4311,6 +4315,7 @@ const DATOS_INICIALES = {
       "detalle": "Proyecto Cultivando el Campo - mujeres rurales",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4326,6 +4331,7 @@ const DATOS_INICIALES = {
       "detalle": "Proyecto Cultivando el Campo - mujeres rurales",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4341,6 +4347,7 @@ const DATOS_INICIALES = {
       "detalle": "Proyecto Cultivando el Campo - mujeres rurales",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4356,6 +4363,7 @@ const DATOS_INICIALES = {
       "detalle": "Proyecto Cultivando el Campo - mujeres rurales",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4371,6 +4379,7 @@ const DATOS_INICIALES = {
       "detalle": "Proyecto Cultivando el Campo - mujeres rurales",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4386,6 +4395,7 @@ const DATOS_INICIALES = {
       "detalle": "Proyecto Cultivando el Campo - mujeres rurales",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4401,6 +4411,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 079-2025 · Visita técnica aprobada",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4416,6 +4427,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 079-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4431,6 +4443,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 079-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 1,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4446,6 +4459,7 @@ const DATOS_INICIALES = {
       "detalle": "3 visitas: 27 ene, 13 feb, 02 mar · CPS065-2026",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 40,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4461,6 +4475,7 @@ const DATOS_INICIALES = {
       "detalle": "2 visitas: 17 feb, 05-07 mar · Subsidio Res. 06-2026: $1.2M",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 25,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4476,6 +4491,7 @@ const DATOS_INICIALES = {
       "detalle": "2 visitas: 23 feb, 18 mar",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 80,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4491,6 +4507,7 @@ const DATOS_INICIALES = {
       "detalle": "2 visitas: 25 feb, 03 mar · Res. 08-2026",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 35,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4506,6 +4523,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 076-2024 · $527.686.783",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 120,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4521,6 +4539,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio 074-2025 · $214.907.331 · En fase preoperativa",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 40,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4536,6 +4555,7 @@ const DATOS_INICIALES = {
       "detalle": "Convenio CORNARE - economía circular",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 16,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4551,6 +4571,7 @@ const DATOS_INICIALES = {
       "detalle": "SCI-442-2025",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 61,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4566,6 +4587,7 @@ const DATOS_INICIALES = {
       "detalle": "16-20 feb 2026",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 331,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4581,6 +4603,7 @@ const DATOS_INICIALES = {
       "detalle": "PRISER La Sonadora",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 25,
       "timestamp": "2026-03-31T00:00:00.000Z"
     },
     {
@@ -4596,6 +4619,7 @@ const DATOS_INICIALES = {
       "detalle": "PRISER La Piedra",
       "anio": "2026",
       "trimestre": "1",
+      "personas_representadas": 20,
       "timestamp": "2026-03-31T00:00:00.000Z"
     }
   ],
