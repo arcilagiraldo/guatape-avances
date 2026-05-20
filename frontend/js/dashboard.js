@@ -34,15 +34,18 @@ const DASHBOARD = {
       return;
     }
 
-    // pct_global: promedio de pct_pd de todos los programas con datos reales
-    // (el campo metricas.pct_global_cuatrienio usa avance_acumulado que puede estar vacío)
-    const psConDatos  = ps.filter(p => parseFloat(p.pct_pd) > 0 || parseFloat(p.pct_pa) > 0);
-    const pctGlobal   = ps.length > 0
-      ? parseFloat((ps.reduce((s,p) => s + (parseFloat(p.pct_pd)||0), 0) / ps.length).toFixed(1))
-      : parseFloat(m.pct_global_cuatrienio || 0);
-    const pctPA       = psConDatos.length > 0
-      ? parseFloat((psConDatos.reduce((s,p) => s + (parseFloat(p.pct_pa)||0), 0) / psConDatos.length).toFixed(1))
-      : 0;
+    const psConDatos = ps.filter(p => parseFloat(p.pct_pd) > 0 || parseFloat(p.pct_pa) > 0);
+    // Usar campos del backend si ya están corregidos; calcular desde programas como respaldo
+    const pctGlobal  = parseFloat(m.pct_global_cuatrienio) > 0
+      ? parseFloat(m.pct_global_cuatrienio)
+      : ps.length > 0
+        ? parseFloat((ps.reduce((s,p) => s + (parseFloat(p.pct_pd)||0), 0) / ps.length).toFixed(1))
+        : 0;
+    const pctPA      = parseFloat(m.pct_pa_reportados) > 0
+      ? parseFloat(m.pct_pa_reportados)
+      : psConDatos.length > 0
+        ? parseFloat((psConDatos.reduce((s,p) => s + (parseFloat(p.pct_pa)||0), 0) / psConDatos.length).toFixed(1))
+        : 0;
     const totalCont  = cs.reduce((s,c) => s + (parseFloat(c.valor)||0), 0);
     const enMeta     = ps.filter(p => parseFloat(p.pct_pa) >= 75).length;
     const alertas    = this._calcularAlertas(ps, cs);
