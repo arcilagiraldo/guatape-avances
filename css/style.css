@@ -683,7 +683,9 @@ body {
 }
 .inicio-hero-eyebrow { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(137,196,226,.5); margin-bottom: 6px; }
 .inicio-hero-titulo  { font-family: var(--font-d); font-size: 1.75rem; font-weight: 600; color: #fff; margin-bottom: 6px; }
-.inicio-hero-periodo { font-size: 12px; color: rgba(137,196,226,.65); }
+.inicio-hero-periodo { font-size: 12px; color: rgba(137,196,226,.65); margin-bottom: 10px; }
+.inicio-hero-chips  { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.inicio-chip { font-size: 11px; border: 1px solid; border-radius: 20px; padding: 3px 10px; }
 .inicio-hero-right   { flex-shrink: 0; }
 .inicio-pct-circulo  {
   display: flex; flex-direction: column; align-items: center; justify-content: center;

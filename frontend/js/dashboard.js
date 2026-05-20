@@ -34,7 +34,15 @@ const DASHBOARD = {
       return;
     }
 
-    const pctGlobal  = parseFloat(m.pct_global_cuatrienio || 0);
+    // pct_global: promedio de pct_pd de todos los programas con datos reales
+    // (el campo metricas.pct_global_cuatrienio usa avance_acumulado que puede estar vacío)
+    const psConDatos  = ps.filter(p => parseFloat(p.pct_pd) > 0 || parseFloat(p.pct_pa) > 0);
+    const pctGlobal   = ps.length > 0
+      ? parseFloat((ps.reduce((s,p) => s + (parseFloat(p.pct_pd)||0), 0) / ps.length).toFixed(1))
+      : parseFloat(m.pct_global_cuatrienio || 0);
+    const pctPA       = psConDatos.length > 0
+      ? parseFloat((psConDatos.reduce((s,p) => s + (parseFloat(p.pct_pa)||0), 0) / psConDatos.length).toFixed(1))
+      : 0;
     const totalCont  = cs.reduce((s,c) => s + (parseFloat(c.valor)||0), 0);
     const enMeta     = ps.filter(p => parseFloat(p.pct_pa) >= 75).length;
     const alertas    = this._calcularAlertas(ps, cs);
@@ -42,7 +50,7 @@ const DASHBOARD = {
     const sMap       = {}; secs.forEach(s => sMap[s.id] = s);
 
     wrap.innerHTML = `
-      ${this._htmlHero(pctGlobal, periodos)}
+      ${this._htmlHero(pctGlobal, pctPA, periodos, psConDatos.length, ps.length)}
       ${this._htmlKpis(ps, bs, cs, pctGlobal, totalCont, enMeta, alertas)}
       ${this._htmlSecretarias(ps, secs)}
       <div class="inicio-dos-col">
@@ -55,20 +63,26 @@ const DASHBOARD = {
   },
 
   // ── Hero ─────────────────────────────────────────────────────
-  _htmlHero(pct, periodos) {
-    const col = pct >= 75 ? "#078838" : pct >= 40 ? "#c8a800" : "#a32d2d";
-    const per = periodos.length ? periodos.join(" · ") : "Sin períodos reportados";
+  _htmlHero(pctPD, pctPA, periodos, reportados, total) {
+    const colPD = pctPD >= 75 ? "#078838" : pctPD >= 40 ? "#c8a800" : "#a32d2d";
+    const colPA = pctPA >= 75 ? "#078838" : pctPA >= 40 ? "#c8a800" : "#a32d2d";
+    const per   = periodos.length ? periodos.join(" · ") : "Sin períodos reportados";
+    const cobertura = total > 0 ? Math.round((reportados/total)*100) : 0;
     return `
       <div class="inicio-hero">
         <div class="inicio-hero-left">
           <div class="inicio-hero-eyebrow">Alcaldía de Guatapé · Antioquia</div>
           <h1 class="inicio-hero-titulo">Juntos Construimos Guatapé</h1>
           <div class="inicio-hero-periodo">Plan de Desarrollo 2024–2027 · ${per}</div>
+          <div class="inicio-hero-chips">
+            <span class="inicio-chip" style="color:${colPA};border-color:${colPA}40">PA ${pctPA}% — Plan Acción</span>
+            <span class="inicio-chip" style="color:rgba(137,196,226,.6);border-color:rgba(137,196,226,.2)">${reportados}/${total} programas reportados · ${cobertura}% cobertura</span>
+          </div>
         </div>
         <div class="inicio-hero-right">
-          <div class="inicio-pct-circulo" style="--pct-color:${col}">
-            <span class="inicio-pct-num">${pct}%</span>
-            <span class="inicio-pct-lbl">Cumplimiento<br>Plan Desarrollo</span>
+          <div class="inicio-pct-circulo" style="--pct-color:${colPD}">
+            <span class="inicio-pct-num">${pctPD}%</span>
+            <span class="inicio-pct-lbl">Avance<br>Plan Desarrollo</span>
           </div>
         </div>
       </div>`;
