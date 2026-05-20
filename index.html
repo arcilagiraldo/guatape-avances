@@ -76,13 +76,12 @@
       </div>
     </div>
     <div class="nav-links">
-      <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+      <button class="nav-btn active" data-section="dashboard">🏠 Inicio</button>
       <button class="nav-btn" data-section="mapa">🗺️ Mapa</button>
       <button class="nav-btn" data-section="logros">📈 Logros</button>
       <button class="nav-btn" data-section="cuatrienio">🏁 Cuatrienio</button>
       <button class="nav-btn" data-section="contratos">📋 Contratos</button>
       <button class="nav-btn" data-section="biblioteca">📁 Biblioteca</button>
-      <button class="nav-btn" data-section="publica">👁️ Vista pública</button>
       <button class="nav-btn admin-only hidden" data-section="admin">🔒 Admin</button>
     </div>
     <div class="nav-right">
@@ -119,12 +118,12 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!-- DASHBOARD EJECUTIVO                                        -->
+<!-- INICIO (Dashboard + Vista ciudadana)                       -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section class="seccion active" id="sec-dashboard">
-  <div class="dashboard-grid" id="dashboardGrid">
+  <div id="inicioContenido">
     <!-- Renderizado por dashboard.js -->
-    <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--texto-3)">
+    <div style="text-align:center;padding:4rem 2rem;color:var(--texto-3)">
       <div style="width:36px;height:36px;border:3px solid var(--azul);border-top-color:transparent;
            border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px"></div>
       <p style="font-size:13px">Cargando datos del municipio...</p>
@@ -132,6 +131,17 @@
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </section>
+
+<!-- Panel de detalle (slide-over) -->
+<div id="detalleOverlay" class="detalle-overlay hidden" onclick="DASHBOARD.cerrarDetalle(event)">
+  <div class="detalle-panel" id="detallePanel">
+    <div class="detalle-header">
+      <h3 id="detalleTitulo">Detalle</h3>
+      <button class="detalle-cerrar" onclick="DASHBOARD.cerrarDetalle()">✕</button>
+    </div>
+    <div id="detalleContenido" class="detalle-body"></div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- MAPA COMPLETO                                              -->
@@ -204,30 +214,6 @@
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- VISTA PÚBLICA (ciudadanos)                                 -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<section class="seccion" id="sec-publica">
-  <!-- Hero -->
-  <div class="pub-hero">
-    <div style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(137,196,226,.45);margin-bottom:6px">
-      Alcaldía de Guatapé · Departamento de Antioquia
-    </div>
-    <div style="font-family:var(--font-d);font-size:1.8rem;font-weight:600;color:#fff;margin-bottom:4px">
-      Juntos Construimos Guatapé
-    </div>
-    <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:1.25rem">
-      Plan de Desarrollo 2024–2027 · Transparencia y rendición de cuentas
-    </div>
-    <div class="pub-kpi-row" id="pubKpiRow">
-      <!-- Renderizado por dashboard.js -->
-    </div>
-  </div>
-  <!-- Logros resumidos para ciudadanos -->
-  <div class="pub-programas" id="pubProgramas">
-    <!-- Renderizado por dashboard.js -->
-  </div>
-</section>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- ADMIN                                                      -->
@@ -629,11 +615,11 @@
 
 <!-- ── Nav mobile ── -->
 <nav class="mobile-nav" id="mobileNav">
-  <button class="mobile-nav-btn active" data-section="dashboard"><span class="ico">📊</span>Dashboard</button>
+  <button class="mobile-nav-btn active" data-section="dashboard"><span class="ico">🏠</span>Inicio</button>
   <button class="mobile-nav-btn"        data-section="mapa">     <span class="ico">🗺️</span>Mapa</button>
   <button class="mobile-nav-btn"        data-section="logros">   <span class="ico">📈</span>Logros</button>
   <button class="mobile-nav-btn"        data-section="contratos"><span class="ico">📋</span>Contratos</button>
-  <button class="mobile-nav-btn"        data-section="publica">  <span class="ico">👁️</span>Público</button>
+  <button class="mobile-nav-btn"        data-section="biblioteca"><span class="ico">📁</span>Docs</button>
 </nav>
 
 <div class="toast hidden" id="toast"></div>
