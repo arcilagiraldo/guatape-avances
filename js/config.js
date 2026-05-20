@@ -45,7 +45,7 @@ const APP_CONFIG = {
   COLOR_PPAL:  "#17272D",   // --marino: navbar, encabezados
   COLOR_SEC:   "#89C4E2",   // --azul: botones, badges, acentos
   COLOR_ACENT: "#FBDC08",   // --amarillo: alertas, dots live
-  COLOR_DARK:  "#17272D"    // mismo marino
+  COLOR_DARK:  "#17272D",   // mismo marino
 
   // ┌─────────────────────────────────────────────────────────────┐
   // │  PASO 4 — Centro del mapa                                  │
