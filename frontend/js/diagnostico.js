@@ -207,6 +207,30 @@ const DIAGNOSTICO = {
     } else {
       this._log("Error al consultar: " + r.error, "error");
     }
+  },
+
+  async recalibrarCoords(btn) {
+    if (!confirm("¿Recalibrar todas las ubicaciones aproximadas del mapa?\n\nEsto moverá los marcadores con posición estimada a las coordenadas correctas de cada vereda. Los marcadores con posición exacta (GPS real) no se modifican.")) return;
+    const original = btn.textContent;
+    btn.textContent = "⏳ Recalibrando..."; btn.disabled = true;
+    this._limpiar();
+    this._log("RECALIBRANDO COORDENADAS DEL MAPA", "titulo");
+    if (API._esModoLocal()) {
+      this._log("Esta función requiere conexión al servidor real.", "warn");
+      btn.textContent = original; btn.disabled = false;
+      return;
+    }
+    const r = await API.post({ action: "recalibrar_coords" });
+    if (r.ok) {
+      this._log(r.msg || "Recalibración completada", "ok");
+      this._log("Recarga el mapa para ver los cambios.", "info");
+      APP.cargarDatos();
+      APP.toast("✅ " + r.msg);
+    } else {
+      this._log("Error: " + r.error, "error");
+      APP.toast("❌ Error: " + r.error, "error");
+    }
+    btn.textContent = original; btn.disabled = false;
   }
 };
 

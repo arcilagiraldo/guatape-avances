@@ -447,6 +447,16 @@
             <button class="btn-secondary" onclick="DIAGNOSTICO.verEstadoDB()" style="font-size:12px">🗄️ Estado base de datos</button>
             <button class="btn-secondary" onclick="SETUP.mostrarGuiaGitHub()" style="font-size:12px">📡 Guía GitHub Pages</button>
           </div>
+          <div style="background:var(--amarillo-50);border:.5px solid var(--amarillo);border-radius:8px;padding:10px 12px;margin-bottom:1rem">
+            <div style="font-size:12px;font-weight:500;color:var(--marino);margin-bottom:6px">📍 Recalibrar ubicaciones en el mapa</div>
+            <div style="font-size:11px;color:var(--texto-2);margin-bottom:8px">
+              Reubica todos los beneficiarios con posición <em>aproximada</em> a las coordenadas correctas de su vereda.<br>
+              Úsalo una vez si los datos fueron importados con ubicaciones incorrectas.
+            </div>
+            <button onclick="DIAGNOSTICO.recalibrarCoords(this)" style="width:100%;background:var(--marino);color:var(--azul);border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-s)">
+              🗺️ Recalibrar coordenadas aproximadas
+            </button>
+          </div>
           <div style="background:#0D1117;border-radius:8px;padding:12px;
                font-family:monospace;font-size:11.5px;color:#8B949E;
                min-height:120px;max-height:280px;overflow-y:auto" id="diagnosticoLog">
