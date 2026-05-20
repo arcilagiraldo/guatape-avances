@@ -91,11 +91,17 @@ const DASHBOARD = {
       </div>`;
   },
 
+  _personas(arr) {
+    return arr.reduce((s, b) => s + (parseInt(b.personas_representadas) || 1), 0);
+  },
+
   // ── KPIs clickables ───────────────────────────────────────────
   _htmlKpis(ps, bs, cs, pct, totalCont, enMeta, alertas) {
+    const totalPersonas = this._personas(bs);
+    const nVeredas = [...new Set(bs.map(b => b.vereda))].length;
     const kpis = [
-      { ico:"📋", num: ps.length,                      lbl:"Programas",      sub:`🟢 ${enMeta} en meta`,                          tipo:"programas" },
-      { ico:"👥", num: bs.length.toLocaleString("es-CO"), lbl:"Beneficiarios", sub:`${[...new Set(bs.map(b=>b.vereda))].length} veredas`, tipo:"beneficiarios" },
+      { ico:"📋", num: ps.length,                              lbl:"Programas",           sub:`🟢 ${enMeta} en meta`,                                        tipo:"programas" },
+      { ico:"👥", num: totalPersonas.toLocaleString("es-CO"),  lbl:"Personas impactadas", sub:`${bs.length} registros · ${nVeredas} veredas`,                tipo:"beneficiarios" },
       { ico:"💰", num: API.fmtPeso(totalCont),          lbl:"Contratado",     sub:`${cs.length} contratos activos`,                tipo:"contratos" },
       { ico: alertas.criticas > 0 ? "⚠️" : "✅",
         num: alertas.criticas > 0 ? alertas.criticas : enMeta,
@@ -223,26 +229,26 @@ const DASHBOARD = {
   _htmlBeneficiarios(bs, ps) {
     if (!bs.length) return "";
     const cnt = {}, prog = {};
+    const totalPersonas = this._personas(bs);
     bs.forEach(b => {
-      cnt[b.vereda] = (cnt[b.vereda]||0)+1;
+      const p = parseInt(b.personas_representadas) || 1;
+      cnt[b.vereda] = (cnt[b.vereda]||0) + p;
       if (!prog[b.vereda]) prog[b.vereda] = new Set();
       prog[b.vereda].add(b.programa_codigo);
     });
     const vCol   = this._config?.veredas || {};
-    // Todas las veredas con datos, ordenadas por cantidad
     const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
-    // Veredas configuradas sin beneficiarios aún
     const sinDatos = Object.keys(vCol).filter(n => !cnt[n]);
     return `
       <div class="inicio-veredas-wrap">
         <div class="inicio-secs-titulo" style="display:flex;align-items:center;gap:8px;">
-          Beneficiarios por vereda
+          Personas impactadas por vereda
           <span style="font-size:11px;font-weight:400;color:var(--texto-3)">${sorted.length} de ${Object.keys(vCol).length || sorted.length} veredas con datos</span>
         </div>
         <div class="inicio-veredas-grid">
           ${sorted.map(([v,n])=>{
             const col  = (vCol[v]||{}).color||"var(--texto-3)";
-            const pct  = Math.round((n/bs.length)*100);
+            const pct  = totalPersonas > 0 ? Math.round((n/totalPersonas)*100) : 0;
             const icos = [...(prog[v]||new Set())].slice(0,3).map(cod=>{
               const p = ps.find(x=>x.codigo===cod);
               return this._config?.iconos?.[p?.tipo_icono]?.emoji||"📋";
@@ -289,7 +295,7 @@ const DASHBOARD = {
       const k = p.tipo_icono||"general";
       if (!grupos[k]) grupos[k] = { programas:[], benefs:0 };
       grupos[k].programas.push(p);
-      grupos[k].benefs += bs.filter(b=>b.programa_codigo===p.codigo).length;
+      grupos[k].benefs += bs.filter(b=>b.programa_codigo===p.codigo).reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
     });
     const cards = Object.entries(grupos).map(([tipo, g]) => {
       const ic  = iconos[tipo]||{emoji:"📋",label:"Programa"};
@@ -346,16 +352,18 @@ const DASHBOARD = {
         </div>`}).join("")}</div>`;
 
     } else if (tipo === "beneficiarios") {
-      titulo = `👥 ${bs.length} Beneficiarios registrados`;
-      html = `<div class="det-tabla">${bs.map(b=>`
-        <div class="det-fila">
+      const totalP = this._personas(bs);
+      titulo = `👥 ${totalP.toLocaleString("es-CO")} personas · ${bs.length} registros`;
+      html = `<div class="det-tabla">${bs.map(b=>{
+        const per = parseInt(b.personas_representadas)||1;
+        return `<div class="det-fila">
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:500">${b.nombre||"—"}</div>
-            <div style="font-size:10.5px;color:var(--texto-3)">${b.vereda||""} · ${b.tipo_beneficio||""}</div>
+            <div style="font-size:10.5px;color:var(--texto-3)">${b.vereda||""} · ${b.tipo_beneficio||""}${per>1?` · 👥 ${per} personas`:""}</div>
             ${b.detalle?`<div style="font-size:11px;color:var(--texto-2)">${b.detalle}</div>`:""}
           </div>
           <span style="font-size:11px;color:var(--texto-3);white-space:nowrap">${b.anio||""} Q${b.trimestre||""}</span>
-        </div>`).join("")}</div>`;
+        </div>`}).join("")}</div>`;
 
     } else if (tipo === "contratos") {
       titulo = `💰 ${cs.length} Contratos`;
@@ -411,14 +419,16 @@ const DASHBOARD = {
     } else if (tipo.startsWith("vereda_")) {
       const vereda = tipo.replace("vereda_","");
       const bvs    = bs.filter(b=>b.vereda===vereda);
-      titulo = `📍 ${vereda} · ${bvs.length} beneficiarios`;
-      html = `<div class="det-tabla">${bvs.map(b=>`
-        <div class="det-fila">
+      const totalP = this._personas(bvs);
+      titulo = `📍 ${vereda} · ${totalP.toLocaleString("es-CO")} personas (${bvs.length} registros)`;
+      html = `<div class="det-tabla">${bvs.map(b=>{
+        const per = parseInt(b.personas_representadas)||1;
+        return `<div class="det-fila">
           <div style="flex:1">
             <div style="font-size:12px;font-weight:500">${b.nombre||"—"}</div>
-            <div style="font-size:10.5px;color:var(--texto-3)">${b.tipo_beneficio||""} · ${b.detalle||""}</div>
+            <div style="font-size:10.5px;color:var(--texto-3)">${b.tipo_beneficio||""}${b.detalle?" · "+b.detalle:""}${per>1?` · 👥 ${per} personas`:""}</div>
           </div>
-        </div>`).join("")}</div>`;
+        </div>`}).join("")}</div>`;
 
     } else if (tipo.startsWith("grupo_")) {
       const gKey  = tipo.replace("grupo_","");
@@ -428,11 +438,11 @@ const DASHBOARD = {
       html = `<div class="det-tabla">${mios.map(p=>{
         const ppa=(parseFloat(p.pct_pa)||0).toFixed(0);
         const col=ppa>=75?"var(--verde)":ppa>=40?"#c8a800":"var(--rojo)";
-        const bens=bs.filter(b=>b.programa_codigo===p.codigo).length;
+        const bens=bs.filter(b=>b.programa_codigo===p.codigo).reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
         return `<div class="det-fila">
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:600">${p.nombre||"—"}</div>
-            <div style="font-size:10.5px;color:var(--texto-3)">${p.secretaria} ${bens?`· 👥 ${bens} benef.`:""}</div>
+            <div style="font-size:10.5px;color:var(--texto-3)">${p.secretaria} ${bens?`· 👥 ${bens} personas`:""}</div>
             ${p.narrativa?`<div style="font-size:11px;color:var(--texto-2);margin-top:2px">${p.narrativa.substring(0,100)}…</div>`:""}
           </div>
           <div style="font-size:14px;font-weight:700;color:${col};flex-shrink:0">${ppa}% PA</div>
@@ -457,10 +467,11 @@ const DASHBOARD = {
     if (!el) return;
     const d = this._datos;
     if (!d) { el.textContent = ""; return; }
-    const ps    = d.programas?.length||0;
-    const bs    = d.beneficiarios?.length||0;
-    const secs  = new Set((d.programas||[]).map(p=>p.secretaria)).size;
-    const total = (d.contratos||[]).reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
-    el.textContent = ps ? `${secs} secretarías · ${ps} programas · ${bs} benef. · ${API.fmtPeso(total)}` : "";
+    const ps         = d.programas?.length||0;
+    const totalPers  = (d.beneficiarios||[]).reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
+    const nRegs      = d.beneficiarios?.length||0;
+    const secs       = new Set((d.programas||[]).map(p=>p.secretaria)).size;
+    const total      = (d.contratos||[]).reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
+    el.textContent   = ps ? `${secs} secretarías · ${ps} programas · ${totalPers} personas (${nRegs} registros) · ${API.fmtPeso(total)}` : "";
   }
 };

@@ -19,9 +19,10 @@ const LOGROS = {
     const m = this._datos?.metricas      || {};
     const valTotal = c.reduce((s, x) => s + (parseFloat(x.valor) || 0), 0);
 
+    const totalPersonas = b.reduce((s, x) => s + (parseInt(x.personas_representadas) || 1), 0);
     document.getElementById("statsGlobales").innerHTML = [
-      { num: p.length,                             lbl: "Programas activos",    icono: "📋" },
-      { num: b.length.toLocaleString("es-CO"),     lbl: "Beneficiarios",        icono: "👥" },
+      { num: p.length,                                   lbl: "Programas activos",    icono: "📋" },
+      { num: totalPersonas.toLocaleString("es-CO"),      lbl: "Personas impactadas",  icono: "👥" },
       { num: (m.pct_global_cuatrienio || 0) + "%", lbl: "Cumplimiento PD",      icono: "🏁" },
       { num: API.fmtPeso(valTotal),                lbl: "En contratos",         icono: "💰" },
     ].map(x => `
@@ -71,7 +72,7 @@ const LOGROS = {
       const pct = ps.length
         ? (ps.reduce((s, p) => s + (parseFloat(p.pct_pa) || 0), 0) / ps.length).toFixed(0)
         : 0;
-      const nBenef = (bS[sec.id] || []).length;
+      const nBenef = (bS[sec.id] || []).reduce((s, b) => s + (parseInt(b.personas_representadas) || 1), 0);
       const nConts = (cS[sec.id] || []).length;
 
       const card = document.createElement("div");
@@ -87,7 +88,7 @@ const LOGROS = {
           <div class="sec-avatar" style="background:${sec.color}20;">${sec.icono}</div>
           <div class="sec-info">
             <strong>${sec.nombre}</strong>
-            <span>${ps.length} programas · ${nConts} contratos · ${nBenef} benef.</span>
+            <span>${ps.length} programas · ${nConts} contratos · ${nBenef} personas</span>
           </div>
           ${estadoBadge}
         </div>
@@ -117,7 +118,7 @@ const LOGROS = {
         <div style="font-size:11px;background:var(--verde-claro);color:var(--verde-oscuro);padding:3px 8px;border-radius:4px;">🟢 ${alto} en meta</div>
         ${medio ? `<div style="font-size:11px;background:var(--dorado-claro);color:var(--dorado);padding:3px 8px;border-radius:4px;">🟡 ${medio} en progreso</div>` : ""}
         ${bajo  ? `<div style="font-size:11px;background:var(--rojo-claro);color:var(--rojo);padding:3px 8px;border-radius:4px;">🔴 ${bajo} rezagados</div>` : ""}
-        ${nBenef ? `<div style="font-size:11px;background:var(--azul-claro);color:var(--azul);padding:3px 8px;border-radius:4px;">👥 ${nBenef} benef.</div>` : ""}
+        ${nBenef ? `<div style="font-size:11px;background:var(--azul-claro);color:var(--azul);padding:3px 8px;border-radius:4px;">👥 ${nBenef} personas</div>` : ""}
         ${valTotal ? `<div style="font-size:11px;background:var(--gris-bg);color:var(--texto-2);padding:3px 8px;border-radius:4px;">💰 ${API.fmtPeso(valTotal)}</div>` : ""}
       </div>`;
   },

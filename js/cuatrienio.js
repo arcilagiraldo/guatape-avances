@@ -8,14 +8,16 @@ const CUATRIENIO = {
     const secs    = config?.secretarias || [];
     const pct     = parseFloat(m.pct_global_cuatrienio || 0);
     const periodos= m.periodos_con_datos || [];
+    // Calcular total personas desde el array real (no desde la métrica del backend)
+    const totalPersonas = (datos?.beneficiarios || []).reduce((s, b) => s + (parseInt(b.personas_representadas) || 1), 0);
 
-    this._hero(pct, periodos, m);
+    this._hero(pct, periodos, m, totalPersonas);
     this._porSec(m.por_secretaria || {}, secs);
     this._timeline(periodos);
     this._grafico(pd);
   },
 
-  _hero(pct, periodos, m) {
+  _hero(pct, periodos, m, totalPersonas) {
     const el = document.getElementById("cuatrienioHero");
     if (!el) return;
 
@@ -44,12 +46,12 @@ const CUATRIENIO = {
         <span>Meta: 100% al 31-Dic-2027</span>
       </div>
 
-      ${m.total_beneficiarios || m.total_programas || m.total_contratos ? `
+      ${m.total_programas || totalPersonas || m.total_contratos ? `
         <div style="display:flex;gap:16px;justify-content:center;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);">
-          ${m.total_programas    ? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${m.total_programas}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Programas</div></div>` : ""}
-          ${m.total_beneficiarios? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${m.total_beneficiarios}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Beneficiarios</div></div>` : ""}
-          ${m.total_contratos    ? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${m.total_contratos}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Contratos</div></div>` : ""}
-          ${m.total_contratado   ? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${API.fmtPeso(m.total_contratado)}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Contratado</div></div>` : ""}
+          ${m.total_programas ? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${m.total_programas}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Programas</div></div>` : ""}
+          ${totalPersonas    ? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${totalPersonas.toLocaleString("es-CO")}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Personas impactadas</div></div>` : ""}
+          ${m.total_contratos? `<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${m.total_contratos}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Contratos</div></div>` : ""}
+          ${m.total_contratado?`<div style="text-align:center;"><div style="font-size:1.4rem;font-weight:600;color:#9FE1CB;">${API.fmtPeso(m.total_contratado)}</div><div style="font-size:10px;color:rgba(255,255,255,.45);">Contratado</div></div>` : ""}
         </div>` : ""}`;
   },
 

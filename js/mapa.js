@@ -40,7 +40,10 @@ const MAPA = {
     const veredas = this._config?.veredas || {};
     const benef   = this._datos?.beneficiarios || [];
     const cnt = {};
-    benef.forEach(b => { cnt[b.vereda] = (cnt[b.vereda] || 0) + 1; });
+    benef.forEach(b => {
+      const p = parseInt(b.personas_representadas) || 1;
+      cnt[b.vereda] = (cnt[b.vereda] || 0) + p;
+    });
 
     Object.entries(veredas).forEach(([n, v]) => {
       const c = cnt[n] || 0;
@@ -50,7 +53,7 @@ const MAPA = {
         radius: radio, fillColor: v.color,
         fillOpacity: .12, color: v.color, weight: 1.5, dashArray: "5 4"
       }).addTo(this._map)
-        .bindTooltip(`<strong>${n}</strong><br>${c} beneficiario${c !== 1 ? "s" : ""}`, {
+        .bindTooltip(`<strong>${n}</strong><br>${c} persona${c !== 1 ? "s" : ""}`, {
           permanent: false, direction: "top", className: ""
         });
     });
@@ -107,6 +110,7 @@ const MAPA = {
       </div>
       <div style="padding:12px 16px;">
         <div style="font-size:10px;color:#9B9A96;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">${label}</div>
+        ${parseInt(b.personas_representadas) > 1 ? `<div style="font-size:12px;font-weight:600;color:#163040;margin-bottom:6px;">👥 ${parseInt(b.personas_representadas)} personas representadas</div>` : ""}
         ${b.tipo_beneficio ? `<div style="font-size:12px;margin-bottom:4px;"><strong>Beneficio:</strong> ${b.tipo_beneficio}</div>` : ""}
         ${b.detalle        ? `<div style="font-size:12px;color:#5F5E5A;margin-bottom:6px;">${b.detalle}</div>` : ""}
         <div style="font-size:11px;color:#9B9A96;margin-bottom:6px;">📅 Q${b.trimestre} ${b.anio}</div>
@@ -121,7 +125,10 @@ const MAPA = {
   _renderLeyenda() {
     const v   = this._config?.veredas || {};
     const cnt = {};
-    (this._datos?.beneficiarios || []).forEach(x => { cnt[x.vereda] = (cnt[x.vereda] || 0) + 1; });
+    (this._datos?.beneficiarios || []).forEach(x => {
+      const p = parseInt(x.personas_representadas) || 1;
+      cnt[x.vereda] = (cnt[x.vereda] || 0) + p;
+    });
 
     const c = document.getElementById("leyendaItems");
     if (!c) return;
@@ -138,7 +145,7 @@ const MAPA = {
         return `<div class="leyenda-item" style="${!num ? "opacity:.45;" : ""}">
            <div class="leyenda-dot" style="background:${i.color};"></div>
            <span style="flex:1;">${n}</span>
-           <span style="color:#9B9A96;font-size:10px;">${num || "—"}</span>
+           <span style="color:#9B9A96;font-size:10px;">${num ? num + " pers." : "—"}</span>
          </div>`;
       }).join("");
   },
