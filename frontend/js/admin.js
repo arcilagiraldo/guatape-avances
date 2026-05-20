@@ -71,6 +71,9 @@ const ADMIN = {
       APP.toast("Sesión cerrada");
     });
 
+    // Cambiar contraseña
+    document.getElementById("btnCambiarPwd")?.addEventListener("click", () => this._cambiarPassword());
+
     // Tabs
     document.querySelectorAll(".admin-tab-btn").forEach(btn =>
       btn.addEventListener("click", () => this._irTab(btn.dataset.tab))
@@ -129,6 +132,26 @@ const ADMIN = {
       err.textContent = r.error || "Error al iniciar sesión";
       err.classList.remove("hidden");
     }
+  },
+
+  // ── Cambiar contraseña ─────────────────────────────────────
+  async _cambiarPassword() {
+    const actual    = document.getElementById("pwdActual").value;
+    const nueva     = document.getElementById("pwdNueva").value;
+    const confirmar = document.getElementById("pwdConfirmar").value;
+    const msg       = document.getElementById("pwdMsg");
+    const mostrar   = (txt, ok) => {
+      msg.textContent = txt;
+      msg.style.display = "block";
+      msg.style.background = ok ? "var(--verde-50)" : "var(--rojo-50)";
+      msg.style.color = ok ? "var(--verde)" : "var(--rojo)";
+    };
+    if (!actual || !nueva || !confirmar) return mostrar("Completa todos los campos.", false);
+    if (nueva.length < 6) return mostrar("La nueva contraseña debe tener al menos 6 caracteres.", false);
+    if (nueva !== confirmar) return mostrar("Las contraseñas nuevas no coinciden.", false);
+    const r = await API.post({ action: "cambiar_password", password_actual: actual, nueva_password: nueva });
+    mostrar(r.ok ? "✅ " + (r.mensaje || "Contraseña actualizada.") : "❌ " + (r.error || "Error al cambiar contraseña."), r.ok);
+    if (r.ok) { document.getElementById("pwdActual").value = ""; document.getElementById("pwdNueva").value = ""; document.getElementById("pwdConfirmar").value = ""; }
   },
 
   // ── Resumen y historial ────────────────────────────────────

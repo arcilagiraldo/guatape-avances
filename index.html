@@ -13,6 +13,41 @@
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODAL SELECCIÓN DE ROL                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="rolModal" class="rol-modal hidden">
+  <div class="rol-modal-inner">
+    <div class="rol-header">
+      <div class="rol-escudo">🏛️</div>
+      <h1 class="rol-titulo">Juntos Construimos Guatapé</h1>
+      <p class="rol-sub-titulo">Observatorio Municipal 2024–2027 · Alcaldía de Guatapé</p>
+    </div>
+    <p class="rol-pregunta">¿Cómo deseas ingresar?</p>
+    <div class="rol-grid" id="rolGrid"></div>
+
+    <!-- Formulario de login (oculto hasta seleccionar rol) -->
+    <div class="rol-login-form hidden" id="rolLoginForm">
+      <h3 id="rolLoginTitle" class="rol-login-title">Iniciar sesión</h3>
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="rolLoginUsuario" placeholder="Usuario" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="rolLoginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" id="rolBtnLogin" style="width:100%;margin-top:4px">Ingresar</button>
+      <div class="login-error hidden" id="rolLoginError"></div>
+    </div>
+
+    <div class="rol-footer">
+      <button class="rol-btn-volver hidden" id="rolBack">← Volver</button>
+      <button class="rol-btn-visitante" id="rolBtnVisitante">👁️ Solo consultar sin ingresar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Franja 4 colores bandera ── -->
 <div class="stripe-bandera">
   <div class="s-azul"></div>
@@ -262,6 +297,7 @@
           <button class="admin-tab-btn" data-tab="tab-pa">📥 Plan de Acción</button>
           <button class="admin-tab-btn active" data-tab="tab-informe">📤 Informe trimestral</button>
           <button class="admin-tab-btn" data-tab="tab-soportes">📋 Soportes</button>
+          <button class="admin-tab-btn" data-tab="tab-password">🔑 Contraseña</button>
           <button class="admin-tab-btn" data-tab="tab-diagnostico">🔧 Diagnóstico</button>
           <button class="admin-tab-btn" data-tab="tab-configuracion">⚙️ Configuración</button>
           <button class="admin-tab-btn" data-tab="tab-historico">📦 Carga histórica</button>
@@ -381,6 +417,29 @@
             📋 Procesar soportes con IA
           </button>
           <div class="mini-terminal hidden" id="terminalSoportes"></div>
+        </div>
+
+        <!-- TAB: Cambiar contraseña -->
+        <div class="admin-tab-panel hidden" id="tab-password" style="padding:1rem 0 1.5rem">
+          <p style="font-size:12px;color:var(--texto-2);margin-bottom:1.2rem;line-height:1.7">
+            Cambia la contraseña de tu cuenta. Debe tener al menos 6 caracteres.
+          </p>
+          <div style="max-width:380px">
+            <div class="form-group">
+              <label>Contraseña actual</label>
+              <input type="password" id="pwdActual" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+              <label>Nueva contraseña</label>
+              <input type="password" id="pwdNueva" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="form-group">
+              <label>Confirmar nueva contraseña</label>
+              <input type="password" id="pwdConfirmar" placeholder="Repite la nueva contraseña">
+            </div>
+            <button class="btn-primary" id="btnCambiarPwd" style="width:100%;margin-top:4px">🔑 Cambiar contraseña</button>
+            <div id="pwdMsg" style="margin-top:10px;font-size:12.5px;border-radius:6px;padding:8px 12px;display:none"></div>
+          </div>
         </div>
 
         <!-- TAB: Diagnóstico -->
@@ -606,6 +665,7 @@
 <script src="js/validacion.js"></script>
 <script src="js/carga-masiva.js"></script>
 <script src="js/admin.js"></script>
+<script src="js/rol.js"></script>
 <script src="js/app.js"></script>
 
 <script>

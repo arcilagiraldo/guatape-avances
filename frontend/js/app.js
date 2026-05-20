@@ -161,4 +161,7 @@ const APP = {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => APP.init());
+document.addEventListener("DOMContentLoaded", () => {
+  APP.init();
+  if (typeof ROL !== "undefined") { ROL._eventos(); ROL.init(); }
+});
