@@ -12,11 +12,28 @@ const API = {
     return !APP_CONFIG.API_URL || APP_CONFIG.API_URL.includes("PEGA_AQUI");
   },
 
+  _filtrarLocal(d, p) {
+    const sec  = p.secretaria && p.secretaria !== "todas"  ? p.secretaria : null;
+    const anio = p.anio       && p.anio       !== "todos"  ? String(p.anio) : null;
+    const trim = p.trimestre  && p.trimestre  !== "todos"  ? String(p.trimestre) : null;
+    if (!sec && !anio && !trim) return d;
+    const filtrar = arr => (arr || []).filter(x =>
+      (!sec  || x.secretaria === sec)  &&
+      (!anio || String(x.anio) === anio) &&
+      (!trim || String(x.trimestre) === trim)
+    );
+    return { ...d,
+      programas:     filtrar(d.programas),
+      beneficiarios: filtrar(d.beneficiarios),
+      contratos:     filtrar(d.contratos),
+    };
+  },
+
   async get(p = {}) {
     // ── DATOS LOCALES: usa datos locales si la URL no está configurada ──
     if (this._esModoLocal()) {
       if (typeof DATOS_INICIALES === "undefined") return { ok: false, error: "Sin URL de API configurada." };
-      if (!p.action || p.action === "datos")  return DATOS_INICIALES;
+      if (!p.action || p.action === "datos")  return this._filtrarLocal(DATOS_INICIALES, p);
       if (p.action === "config")              return API._configDemo();
       return { ok: true };
     }

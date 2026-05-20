@@ -7,6 +7,7 @@ const APP = {
   _seccion: "dashboard",
 
   async init() {
+    try {
     // Inicializar configuración guardada ANTES de todo lo demás
     if (typeof CONFIG_APP !== "undefined") CONFIG_APP.init();
     this._identidad();
@@ -18,6 +19,27 @@ const APP = {
       API.getConfig(),
       API.getDatos({ anio: "todos", trimestre: "todos", secretaria: "todas" })
     ]);
+
+    if (!cfg.ok) {
+      document.getElementById("inicioContenido").innerHTML = `
+        <div style="text-align:center;padding:5rem 2rem;color:var(--texto-3)">
+          <div style="font-size:48px;margin-bottom:1rem;">⚠️</div>
+          <div style="font-size:15px;font-weight:500;color:var(--rojo);margin-bottom:8px">Error al cargar la configuración</div>
+          <div style="font-size:12px;color:var(--texto-3);max-width:400px;margin:0 auto;line-height:1.7">${cfg.error || "No se pudo conectar con el servidor."}</div>
+          <button onclick="location.reload()" style="margin-top:16px;padding:8px 20px;background:var(--verde);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">🔄 Reintentar</button>
+        </div>`;
+      return;
+    }
+    if (!dat.ok) {
+      document.getElementById("inicioContenido").innerHTML = `
+        <div style="text-align:center;padding:5rem 2rem;color:var(--texto-3)">
+          <div style="font-size:48px;margin-bottom:1rem;">⚠️</div>
+          <div style="font-size:15px;font-weight:500;color:var(--rojo);margin-bottom:8px">Error al cargar los datos</div>
+          <div style="font-size:12px;color:var(--texto-3);max-width:400px;margin:0 auto;line-height:1.7">${dat.error || "No se pudieron obtener los datos del municipio."}</div>
+          <button onclick="location.reload()" style="margin-top:16px;padding:8px 20px;background:var(--verde);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">🔄 Reintentar</button>
+        </div>`;
+      return;
+    }
 
     this._config = cfg;
     this._datos  = dat;
@@ -33,6 +55,16 @@ const APP = {
 
     // Auto-refresh cada 5 minutos
     setInterval(() => this.cargarDatos(), 5 * 60 * 1000);
+    } catch (e) {
+      console.error("[APP] Error fatal en init:", e);
+      document.getElementById("inicioContenido").innerHTML = `
+        <div style="text-align:center;padding:5rem 2rem;">
+          <div style="font-size:48px;margin-bottom:1rem;">⚠️</div>
+          <div style="font-size:15px;font-weight:500;color:var(--rojo);margin-bottom:8px">Error inesperado al iniciar la app</div>
+          <div style="font-size:12px;color:var(--texto-3);max-width:400px;margin:0 auto">${e.message}</div>
+          <button onclick="location.reload()" style="margin-top:16px;padding:8px 20px;background:var(--verde);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">🔄 Reintentar</button>
+        </div>`;
+    }
   },
 
   _identidad() {
@@ -111,23 +143,30 @@ const APP = {
       this._datos = dat;
       this._render(this._seccion);
       this._badge(dat.ultimaActualizacion);
+    } else {
+      this.toast("⚠️ " + (dat.error || "Error al actualizar los datos"), "error");
     }
   },
 
   _render(sec) {
     if (!this._datos || !this._config) return;
-    switch (sec) {
-      case "dashboard":  DASHBOARD.render(this._datos, this._config);  break;
-      case "mapa":       MAPA.init(this._datos, this._config);         break;
-      case "logros":     LOGROS.render(this._datos, this._config);     break;
-      case "cuatrienio": CUATRIENIO.render(this._datos, this._config); break;
-      case "contratos":  CONTRATOS.render(this._datos, this._config);  break;
-      case "biblioteca": BIBLIOTECA.render(this._datos, this._config); break;
-      case "publica":    DASHBOARD.render(this._datos, this._config);  break;
-      case "admin":
-        ADMIN.init();
-        if (API.estaLogueado()) setTimeout(() => MAPA_EDITOR.init(this._datos, this._config), 400);
-        break;
+    try {
+      switch (sec) {
+        case "dashboard":  DASHBOARD.render(this._datos, this._config);  break;
+        case "mapa":       MAPA.init(this._datos, this._config);         break;
+        case "logros":     LOGROS.render(this._datos, this._config);     break;
+        case "cuatrienio": CUATRIENIO.render(this._datos, this._config); break;
+        case "contratos":  CONTRATOS.render(this._datos, this._config);  break;
+        case "biblioteca": BIBLIOTECA.render(this._datos, this._config); break;
+        case "publica":    DASHBOARD.render(this._datos, this._config);  break;
+        case "admin":
+          ADMIN.init();
+          if (API.estaLogueado()) setTimeout(() => MAPA_EDITOR.init(this._datos, this._config), 400);
+          break;
+      }
+    } catch (e) {
+      this.toast("⚠️ Error al renderizar " + sec + ": " + e.message, "error");
+      console.error("[APP] Error en _render(" + sec + "):", e);
     }
   },
 

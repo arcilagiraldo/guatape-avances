@@ -126,21 +126,21 @@ const MAPA = {
     const c = document.getElementById("leyendaItems");
     if (!c) return;
 
-    const conDatos = Object.entries(v).filter(([n]) => cnt[n] > 0);
-    if (!conDatos.length) {
+    const todas = Object.entries(v).sort((a, b) => (cnt[b[0]] || 0) - (cnt[a[0]] || 0));
+    if (!todas.length) {
       c.innerHTML = `<div style="font-size:11px;color:#9B9A96;font-style:italic;padding:4px 0;">Sin datos aún</div>`;
       return;
     }
 
-    c.innerHTML = conDatos
-      .sort((a, b) => (cnt[b[0]] || 0) - (cnt[a[0]] || 0))
-      .map(([n, i]) =>
-        `<div class="leyenda-item">
+    c.innerHTML = todas
+      .map(([n, i]) => {
+        const num = cnt[n] || 0;
+        return `<div class="leyenda-item" style="${!num ? "opacity:.45;" : ""}">
            <div class="leyenda-dot" style="background:${i.color};"></div>
            <span style="flex:1;">${n}</span>
-           <span style="color:#9B9A96;font-size:10px;">${cnt[n] || 0}</span>
-         </div>`
-      ).join("");
+           <span style="color:#9B9A96;font-size:10px;">${num || "—"}</span>
+         </div>`;
+      }).join("");
   },
 
   _renderFiltros() {

@@ -228,29 +228,51 @@ const DASHBOARD = {
       if (!prog[b.vereda]) prog[b.vereda] = new Set();
       prog[b.vereda].add(b.programa_codigo);
     });
-    const vCol  = this._config?.veredas || {};
-    const sorted= Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const vCol   = this._config?.veredas || {};
+    // Todas las veredas con datos, ordenadas por cantidad
+    const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+    // Veredas configuradas sin beneficiarios aún
+    const sinDatos = Object.keys(vCol).filter(n => !cnt[n]);
     return `
       <div class="inicio-veredas-wrap">
-        <div class="inicio-secs-titulo">Beneficiarios por vereda</div>
+        <div class="inicio-secs-titulo" style="display:flex;align-items:center;gap:8px;">
+          Beneficiarios por vereda
+          <span style="font-size:11px;font-weight:400;color:var(--texto-3)">${sorted.length} de ${Object.keys(vCol).length || sorted.length} veredas con datos</span>
+        </div>
         <div class="inicio-veredas-grid">
           ${sorted.map(([v,n])=>{
-            const col  = (vCol[v]||{}).color||"var(--azul)";
+            const col  = (vCol[v]||{}).color||"var(--texto-3)";
             const pct  = Math.round((n/bs.length)*100);
             const icos = [...(prog[v]||new Set())].slice(0,3).map(cod=>{
               const p = ps.find(x=>x.codigo===cod);
               return this._config?.iconos?.[p?.tipo_icono]?.emoji||"📋";
             }).join("");
+            const sinConfig = !vCol[v];
             return `
               <div class="inicio-vereda-card" onclick="DASHBOARD.mostrarDetalle('vereda_${v}')">
                 <div class="inicio-vereda-dot" style="background:${col}"></div>
                 <div class="inicio-vereda-info">
-                  <span class="inicio-vereda-nom">${v}</span>
+                  <span class="inicio-vereda-nom">${v}${sinConfig ? ' <span style="font-size:9px;color:var(--texto-3)" title="Vereda no configurada">⚠</span>' : ""}</span>
                   <span class="inicio-vereda-icos">${icos}</span>
                 </div>
                 <div class="inicio-vereda-n">
                   <strong>${n}</strong>
                   <span>${pct}%</span>
+                </div>
+              </div>`;
+          }).join("")}
+          ${sinDatos.map(v => {
+            const col = (vCol[v]||{}).color||"var(--texto-3)";
+            return `
+              <div class="inicio-vereda-card" style="opacity:.45;pointer-events:none;">
+                <div class="inicio-vereda-dot" style="background:${col}"></div>
+                <div class="inicio-vereda-info">
+                  <span class="inicio-vereda-nom">${v}</span>
+                  <span class="inicio-vereda-icos" style="font-size:10px;color:var(--texto-3)">sin datos aún</span>
+                </div>
+                <div class="inicio-vereda-n">
+                  <strong>0</strong>
+                  <span>0%</span>
                 </div>
               </div>`;
           }).join("")}
