@@ -184,6 +184,9 @@ const API = {
   async agregarBeneficiario(d) {
     return this.post({ action: "agregar_beneficiario", ...d });
   },
+  async confirmarVeredas(confirmaciones) {
+    return this.post({ action: "confirmar_veredas", confirmaciones });
+  },
 
   // ── Utilidades ────────────────────────────────────────
   fileToBase64(f) {

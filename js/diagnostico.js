@@ -248,7 +248,12 @@ const DIAGNOSTICO = {
     if (r.ok) {
       this._log(r.msg || "Normalización completada", "ok");
       if (r.detalle) r.detalle.forEach(d => this._log("  • " + d, "info"));
-      this._log("Recarga los datos para ver los cambios.", "info");
+      if (r.pendientes_confirmacion?.length) {
+        this._log(`⚠️ ${r.pendientes_confirmacion.length} beneficiario(s) requieren asignación manual de vereda`, "warn");
+        this._mostrarPendientesConfirmacion(r.pendientes_confirmacion);
+      } else {
+        this._log("Todas las veredas quedaron normalizadas correctamente.", "ok");
+      }
       APP.cargarDatos();
       APP.toast("✅ " + r.msg);
     } else {
@@ -256,6 +261,59 @@ const DIAGNOSTICO = {
       APP.toast("❌ Error: " + r.error, "error");
     }
     btn.textContent = original; btn.disabled = false;
+  },
+
+  _mostrarPendientesConfirmacion(pendientes) {
+    const veredasOficiales = [
+      "La Sonadora","La Peña","La Piedra","Quebrada Arriba",
+      "Los Naranjos","El Roble","El Tronco / El Rosario","Urbano"
+    ];
+    const opts = veredasOficiales.map(v => `<option value="${v}">${v}</option>`).join("");
+    const log  = document.getElementById("diagnosticoLog");
+    if (!log) return;
+
+    const filas = pendientes.map((p, i) => `
+      <div id="diagPend_${i}" style="background:#fff8e1;border:.5px solid #D5B854;border-radius:6px;padding:8px 10px;margin-top:6px">
+        <div style="font-size:11.5px;font-weight:500;color:#1a2a35">${p.nombre || "(sin nombre)"}</div>
+        <div style="font-size:10.5px;color:#856404;margin-bottom:6px">
+          Vereda en el doc: <strong>"${p.vereda_original}"</strong>
+        </div>
+        <div style="display:flex;gap:6px">
+          <select id="diagSel_${i}" style="flex:1;padding:5px;border:.5px solid #ced4da;border-radius:5px;font-size:11px">
+            <option value="">— Seleccionar —</option>${opts}
+          </select>
+          <button onclick="DIAGNOSTICO._confirmarUno(${i},'${p.id}')"
+            style="padding:5px 10px;background:var(--marino);color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer">
+            OK
+          </button>
+        </div>
+        <div id="diagMsg_${i}" style="font-size:10.5px;margin-top:3px;display:none"></div>
+      </div>`).join("");
+
+    log.insertAdjacentHTML("beforeend", `
+      <div style="margin-top:10px;padding:8px 0">
+        <div style="font-size:11.5px;font-weight:500;color:#c0392b;margin-bottom:4px">
+          ⚠️ Asignación manual requerida (${pendientes.length} beneficiarios)
+        </div>
+        ${filas}
+      </div>`);
+  },
+
+  async _confirmarUno(idx, id) {
+    const sel = document.getElementById(`diagSel_${idx}`);
+    const msg = document.getElementById(`diagMsg_${idx}`);
+    if (!sel?.value) {
+      if (msg) { msg.textContent = "Selecciona una vereda."; msg.style.display="block"; msg.style.color="#c0392b"; }
+      return;
+    }
+    const r = await API.confirmarVeredas([{ id, vereda: sel.value }]);
+    if (r.ok) {
+      const fila = document.getElementById(`diagPend_${idx}`);
+      if (fila) { fila.style.opacity="0.5"; fila.style.pointerEvents="none"; }
+      if (msg) { msg.textContent = `✅ Guardado como "${sel.value}"`; msg.style.display="block"; msg.style.color="green"; }
+    } else {
+      if (msg) { msg.textContent = "Error: " + (r.error||"desconocido"); msg.style.display="block"; msg.style.color="#c0392b"; }
+    }
   }
 };
 

@@ -11,6 +11,7 @@ const CARGA_MASIVA = {
   _cola:      [],   // [{archivo, meta, tipo}]
   _activa:    false,
   _resultados:[],   // [{archivo, ok, mensaje, duracion}]
+  _pendientesConf: [], // [{id, nombre, vereda_original, programa_codigo}]
   _totalArchivos: 0,
   _procesados:    0,
   _onFinalizado:  null,
@@ -42,10 +43,11 @@ const CARGA_MASIVA = {
       return;
     }
 
-    this._activa      = true;
-    this._resultados  = [];
-    this._procesados  = 0;
-    this._totalArchivos = this._cola.length;
+    this._activa         = true;
+    this._resultados     = [];
+    this._pendientesConf = [];
+    this._procesados     = 0;
+    this._totalArchivos  = this._cola.length;
     this._onFinalizado  = onFinalizado || null;
 
     this._mostrarPanel();
@@ -145,10 +147,12 @@ const CARGA_MASIVA = {
             .filter(l => l.estado !== "procesando")
             .forEach(l => this._log(`      ${l.estado==="ok"?"✓":l.estado==="warn"?"⚠":"→"} ${l.msg}`, l.estado==="ok"?"ok":l.estado==="warn"?"warn":"info"));
         }
-        // Alertar sobre veredas no reconocidas
-        if (resultado.veredas_no_reconocidas?.length) {
-          this._log(`   ⚠️ Veredas no reconocidas — asignadas temporalmente a "Urbano": ${resultado.veredas_no_reconocidas.join(", ")}`, "warn");
-          this._log(`      Corrígelas en el mapa editando la vereda del beneficiario.`, "info");
+        // Recopilar beneficiarios con vereda pendiente de confirmación
+        if (resultado.pendientes_confirmacion?.length) {
+          resultado.pendientes_confirmacion.forEach(p => {
+            if (!this._pendientesConf.find(x => x.id === p.id)) this._pendientesConf.push(p);
+          });
+          this._log(`   ⚠️ ${resultado.pendientes_confirmacion.length} beneficiario(s) con vereda desconocida — requieren asignación manual`, "warn");
         }
       } else {
         const error = resultado.error || "Error desconocido";
@@ -251,6 +255,92 @@ const CARGA_MASIVA = {
 
     if (ok.length > 0) APP.toast(`✅ ${ok.length} archivo(s) cargados correctamente`);
     if (fallos.length > 0) APP.toast(`⚠️ ${fallos.length} archivo(s) con error`, "error");
+
+    // Panel de veredas pendientes de confirmación
+    if (this._pendientesConf.length) {
+      this._mostrarPanelConfirmacion();
+    }
+  },
+
+  // ── Panel de asignación de veredas pendientes ─────────────────
+  _mostrarPanelConfirmacion() {
+    const pendientes = this._pendientesConf;
+    if (!pendientes.length) return;
+    const veredasOficiales = [
+      "La Sonadora","La Peña","La Piedra","Quebrada Arriba",
+      "Los Naranjos","El Roble","El Tronco / El Rosario","Urbano"
+    ];
+    const opts = veredasOficiales.map(v => `<option value="${v}">${v}</option>`).join("");
+
+    const filas = pendientes.map((p, i) => `
+      <div id="pendConf_${i}" style="background:#f8f9fa;border:.5px solid #dee2e6;border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:500;color:#1a2a35;margin-bottom:2px">${p.nombre || "(sin nombre)"}</div>
+        <div style="font-size:11px;color:#6c757d;margin-bottom:8px">
+          Vereda en el documento: <strong style="color:#c0392b">"${p.vereda_original}"</strong>
+          ${p.programa_codigo ? `· Programa: ${p.programa_codigo}` : ""}
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="selVereda_${i}" style="flex:1;padding:6px 8px;border:.5px solid #ced4da;border-radius:6px;font-size:12px;background:#fff">
+            <option value="">— Seleccionar vereda oficial —</option>
+            ${opts}
+          </select>
+          <button onclick="CARGA_MASIVA._guardarConfirmacion(${i},'${p.id}')"
+            style="padding:6px 14px;background:var(--marino);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap">
+            Guardar
+          </button>
+        </div>
+        <div id="confMsg_${i}" style="font-size:11px;margin-top:4px;display:none"></div>
+      </div>`).join("");
+
+    const contenedor = document.createElement("div");
+    contenedor.id = "cmPanelConfirmacion";
+    contenedor.style.cssText = "padding:1rem 1.25rem;border-top:.5px solid var(--borde)";
+    contenedor.innerHTML = `
+      <div style="font-size:13px;font-weight:500;color:#c0392b;margin-bottom:10px">
+        ⚠️ ${pendientes.length} beneficiario(s) con vereda desconocida
+      </div>
+      <div style="font-size:11.5px;color:var(--texto-2);margin-bottom:12px">
+        Los siguientes registros mencionan ubicaciones que no corresponden a ninguna
+        vereda oficial de Guatapé. Asigna cada uno a su vereda real para que aparezca
+        correctamente en el mapa y en los reportes.
+      </div>
+      <div id="listaPendientes">${filas}</div>
+      <div id="cmConfResumen" style="display:none;margin-top:10px;padding:8px 12px;background:var(--verde-50);border:.5px solid var(--verde);border-radius:8px;font-size:12px;color:var(--verde)"></div>`;
+
+    const panel = document.querySelector("#cmPanel > div");
+    if (panel) panel.appendChild(contenedor);
+  },
+
+  async _guardarConfirmacion(idx, id) {
+    const sel = document.getElementById(`selVereda_${idx}`);
+    const msg = document.getElementById(`confMsg_${idx}`);
+    if (!sel?.value) {
+      if (msg) { msg.textContent = "Selecciona una vereda primero."; msg.style.display="block"; msg.style.color="#c0392b"; }
+      return;
+    }
+    const vereda = sel.value;
+    const btn = sel.nextElementSibling;
+    btn.disabled = true; btn.textContent = "Guardando...";
+
+    const r = await API.post({ action: "confirmar_veredas", confirmaciones: [{ id, vereda }] });
+
+    if (r.ok) {
+      const fila = document.getElementById(`pendConf_${idx}`);
+      if (fila) {
+        fila.style.opacity = "0.5";
+        fila.style.pointerEvents = "none";
+        fila.insertAdjacentHTML("beforeend", `<div style="font-size:11px;color:var(--verde);margin-top:4px">✅ Guardado como "${vereda}"</div>`);
+      }
+      this._pendientesConf = this._pendientesConf.filter(p => p.id !== id);
+      if (!this._pendientesConf.length) {
+        const res = document.getElementById("cmConfResumen");
+        if (res) { res.textContent = "✅ Todas las veredas han sido asignadas correctamente."; res.style.display="block"; }
+        APP.cargarDatos();
+      }
+    } else {
+      if (msg) { msg.textContent = "Error: " + (r.error||"desconocido"); msg.style.display="block"; msg.style.color="#c0392b"; }
+      btn.disabled = false; btn.textContent = "Guardar";
+    }
   },
 
   // ── Reintentar fallos ─────────────────────────────────────────
