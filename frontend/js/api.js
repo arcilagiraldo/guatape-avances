@@ -79,28 +79,21 @@ const API = {
   },
 
   // ── POST ──────────────────────────────────────────────
-  _urlPost: null,
   async post(b = {}) {
     if (this._esModoLocal()) {
       if (b.action === "login") return { ok:false, error:"La app está en modo local. Configura API_URL para acceder al panel admin." };
       return { ok:false, error:"Modo demo activo: operaciones de escritura deshabilitadas." };
     }
     try {
-      const body = JSON.stringify({ ...b, token: this._token });
-      // Apps Script redirige 302 convirtiendo POST→GET y perdiendo el body.
-      // Solución: primero resolvemos la URL final con GET, luego POST directo.
-      if (!this._urlPost) {
-        const probe = await fetch(APP_CONFIG.API_URL, { redirect: "follow" });
-        this._urlPost = probe.url;
-      }
-      const r = await fetch(this._urlPost, {
+      // Content-Type: text/plain evita el preflight CORS (solicitud simple).
+      // Apps Script ejecuta doPost antes del redirect 302; el redirect solo entrega el resultado.
+      const r = await fetch(APP_CONFIG.API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body
+        body: JSON.stringify({ ...b, token: this._token })
       });
       return await r.json();
     } catch (e) {
-      this._urlPost = null;
       return { ok: false, error: "Error de conexión: " + e.message };
     }
   },
