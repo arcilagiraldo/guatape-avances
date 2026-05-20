@@ -299,6 +299,28 @@ const DIAGNOSTICO = {
       </div>`);
   },
 
+  async migrarPersonas(btn) {
+    const original = btn.textContent;
+    btn.textContent = "⏳ Migrando..."; btn.disabled = true;
+    this._limpiar();
+    this._log("MIGRANDO personas_representadas", "titulo");
+    if (!APP_CONFIG.API_URL || APP_CONFIG.API_URL.includes("PEGA_AQUI")) {
+      this._log("Esta función requiere conexión al servidor real.", "warn");
+      btn.textContent = original; btn.disabled = false; return;
+    }
+    const r = await API.post({ action: "migrar_personas" });
+    if (r.ok) {
+      this._log(r.mensaje || "Migración completada", "ok");
+      this._log(`Total personas en Sheets: ${r.total}`, "dato");
+      APP.toast("✅ personas_representadas migrado — recargando datos...");
+      await APP.cargarDatos();
+    } else {
+      this._log("Error: " + (r.error || "desconocido"), "error");
+      APP.toast("❌ " + (r.error || "Error"), "error");
+    }
+    btn.textContent = original; btn.disabled = false;
+  },
+
   async _confirmarUno(idx, id) {
     const sel = document.getElementById(`diagSel_${idx}`);
     const msg = document.getElementById(`diagMsg_${idx}`);

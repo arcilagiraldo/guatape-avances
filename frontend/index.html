@@ -467,6 +467,16 @@
               🗂️ Normalizar veredas en Sheets
             </button>
           </div>
+          <div style="background:#0D1117;border-radius:8px;padding:12px;margin-bottom:10px;border:.5px solid rgba(159,225,203,.15);">
+            <div style="font-size:11px;color:#9FE1CB;font-weight:500;margin-bottom:4px;">👥 Migrar personas_representadas</div>
+            <div style="font-size:10.5px;color:#8B949E;margin-bottom:8px;">
+              Agrega la columna e infiere el número de personas para registros existentes
+              (detecta "61 personas", "331 estudiantes", etc.). Ejecutar después de actualizar el backend.
+            </div>
+            <button onclick="DIAGNOSTICO.migrarPersonas(this)" style="width:100%;background:#085041;color:#9FE1CB;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-s)">
+              👥 Migrar personas_representadas
+            </button>
+          </div>
           <div style="background:#0D1117;border-radius:8px;padding:12px;
                font-family:monospace;font-size:11.5px;color:#8B949E;
                min-height:120px;max-height:280px;overflow-y:auto" id="diagnosticoLog">
