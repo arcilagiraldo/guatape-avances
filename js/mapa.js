@@ -49,13 +49,16 @@ const MAPA = {
       const c = cnt[n] || 0;
       if (!c) return;
       const radio = Math.max(150, Math.min(500, c * 40));
+      const pob = v.poblacion || 0;
+      const pct = pob ? Math.round(c / pob * 100) : null;
+      const tooltipTxt = pob
+        ? `<strong>${n}</strong><br>${c} persona${c !== 1 ? "s" : ""} beneficiada${c !== 1 ? "s" : ""}<br><span style="color:#888;font-size:10px;">${pct}% de ${pob} habitantes</span>`
+        : `<strong>${n}</strong><br>${c} persona${c !== 1 ? "s" : ""}`;
       L.circle([v.lat, v.lng], {
         radius: radio, fillColor: v.color,
         fillOpacity: .12, color: v.color, weight: 1.5, dashArray: "5 4"
       }).addTo(this._map)
-        .bindTooltip(`<strong>${n}</strong><br>${c} persona${c !== 1 ? "s" : ""}`, {
-          permanent: false, direction: "top", className: ""
-        });
+        .bindTooltip(tooltipTxt, { permanent: false, direction: "top", className: "" });
     });
   },
 
