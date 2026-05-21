@@ -73,13 +73,29 @@ const MAPA = {
 
     let visibles = 0;
     benef.forEach(b => {
-      if (!b.lat || !b.lng || (+b.lat === 0 && +b.lng === 0)) return;
       const ti  = mi[b.programa_codigo] || "general";
       if (this._filtroIcono && ti !== this._filtroIcono) return;
 
       const ico   = iconos[ti] || { emoji: "📋" };
       const vc    = (veredas[b.vereda] || {}).color || "#1D9E75";
       const aprox = b.es_aproximado === "SI";
+      const vCentro = veredas[b.vereda];
+
+      // Para marcadores aproximados: usar centro de vereda + jitter suave
+      // Para exactos: usar coordenadas del beneficiario si son válidas, sino centro de vereda
+      let lat, lng;
+      if (!aprox && b.lat && b.lng && (+b.lat !== 0 || +b.lng !== 0)) {
+        lat = +b.lat; lng = +b.lng;
+      } else if (vCentro) {
+        // Jitter consistente por nombre para separar marcadores de la misma vereda
+        let h = 0;
+        const s = (b.nombre || b.id || "");
+        for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+        lat = vCentro.lat + ((h & 0xFF) - 128) / 128 * 0.0025;
+        lng = vCentro.lng + (((h >> 8) & 0xFF) - 128) / 128 * 0.003;
+      } else {
+        return; // sin coordenadas válidas ni vereda conocida, omitir
+      }
 
       const icon = L.divIcon({
         html: `<div class="marcador-beneficiario" style="background:${vc};${aprox ? "opacity:.7;" : ""}">
@@ -88,7 +104,7 @@ const MAPA = {
         iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32], className: ""
       });
 
-      const m = L.marker([+b.lat, +b.lng], { icon }).addTo(this._map);
+      const m = L.marker([lat, lng], { icon }).addTo(this._map);
       m.on("click", () => this._popup(b, ico, vc));
       this._marcadores.push(m);
       visibles++;
