@@ -69,14 +69,15 @@ const API = {
         { id:"hacienda",       nombre:"Sec. de Hacienda",                        color:"#2D6A4F", icono:"💰" },
       ],
       veredas: {
-        "La Sonadora":        {"lat":6.1987,"lng":-75.1779,"color":"#2ECC71"},
-        "La Peña":            {"lat":6.2198,"lng":-75.1953,"color":"#3498DB"},
-        "La Piedra":          {"lat":6.2218,"lng":-75.1432,"color":"#F39C12"},
-        "Quebrada Arriba":    {"lat":6.2672,"lng":-75.1792,"color":"#E67E22"},
-        "Los Naranjos":       {"lat":6.2549,"lng":-75.1934,"color":"#9B59B6"},
-        "El Roble":           {"lat":6.2573,"lng":-75.1648,"color":"#1ABC9C"},
-        "El Tronco / El Rosario": {"lat":6.1953,"lng":-75.1632,"color":"#E74C3C"},
-        "Urbano":             {"lat":6.2321,"lng":-75.1567,"color":"#34495E"}
+        "La Sonadora":     {"lat":6.1900,"lng":-75.2000,"color":"#2ECC71"},
+        "La Peña":         {"lat":6.2050,"lng":-75.1780,"color":"#3498DB"},
+        "La Piedra":       {"lat":6.2194,"lng":-75.1792,"color":"#F39C12"},
+        "Quebrada Arriba": {"lat":6.2680,"lng":-75.1380,"color":"#E67E22"},
+        "Los Naranjos":    {"lat":6.2526,"lng":-75.1669,"color":"#9B59B6"},
+        "El Roble":        {"lat":6.2430,"lng":-75.1700,"color":"#1ABC9C"},
+        "El Rosario":      {"lat":6.2720,"lng":-75.1150,"color":"#E74C3C"},
+        "El Tronco":       {"lat":6.2350,"lng":-75.1050,"color":"#795548"},
+        "Urbano":          {"lat":6.2311,"lng":-75.1535,"color":"#34495E"}
       },
       iconos: {
         forestal:{"emoji":"🌳","label":"Conservación forestal"},
