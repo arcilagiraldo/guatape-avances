@@ -4240,6 +4240,7 @@ const DATOS_INICIALES = {
   "beneficiarios": [
     {
       "id": "b1",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050201",
       "nombre": "JAC La Piedra - PSA y reforestación",
@@ -4256,6 +4257,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b2",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050201",
       "nombre": "JAC La Sonadora - PSA y reforestación",
@@ -4272,6 +4274,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b3",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050201",
       "nombre": "JAC Quebrada Arriba - PSA y reforestación",
@@ -4288,6 +4291,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b4",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050201",
       "nombre": "JAC El Rosario - PSA y reforestación",
@@ -4304,6 +4308,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b5",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050404",
       "nombre": "Adela Maria Ramirez Urrea",
@@ -4320,6 +4325,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b6",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050404",
       "nombre": "Amparo del Socorro Valencia Vargas",
@@ -4336,6 +4342,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b7",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050404",
       "nombre": "Ana Alejandra Marin Marin",
@@ -4352,6 +4359,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b8",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050404",
       "nombre": "Claudia Yaneth Henao Marin",
@@ -4368,6 +4376,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b9",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050404",
       "nombre": "Maria Ayde Restrepo Salazar",
@@ -4384,6 +4393,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b10",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050404",
       "nombre": "Maria Stella Gallego Gallo",
@@ -4400,6 +4410,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b11",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050401",
       "nombre": "Beneficiario El Rosario 1 - pozo séptico",
@@ -4416,6 +4427,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b12",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050401",
       "nombre": "Beneficiario La Peña 1 - pozo séptico",
@@ -4432,6 +4444,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b13",
+      "tipo_receptor": "individual",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050401",
       "nombre": "Beneficiario Quebrada Arriba 1 - pozo séptico",
@@ -4448,6 +4461,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b14",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050106",
       "nombre": "Acueducto El Tesoro (Quebrada Arriba)",
@@ -4464,6 +4478,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b15",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050106",
       "nombre": "Acueducto La Sonadora",
@@ -4480,6 +4495,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b16",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050106",
       "nombre": "Acueducto Multiveredal La Piedra-La Peña-Los Naranjos",
@@ -4496,6 +4512,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b17",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050106",
       "nombre": "Acueducto El Roble",
@@ -4512,6 +4529,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b18",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050102",
       "nombre": "Comunidad Multiveredal - tanque almacenamiento",
@@ -4528,6 +4546,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b19",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050102",
       "nombre": "Comunidad El Roble - bocatoma",
@@ -4544,6 +4563,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b20",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050502",
       "nombre": "Asociación Guatapé Recicla - 16 recicladores",
@@ -4560,6 +4580,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b21",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050204",
       "nombre": "JAC Quebrada Arriba - talleres PRISER",
@@ -4576,6 +4597,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b22",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050204",
       "nombre": "IENSP - Feria Ambiental",
@@ -4592,6 +4614,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b23",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050303",
       "nombre": "Comunidad La Sonadora - trinchos erosión",
@@ -4608,6 +4631,7 @@ const DATOS_INICIALES = {
     },
     {
       "id": "b24",
+      "tipo_receptor": "colectivo",
       "secretaria": "medio_ambiente",
       "programa_codigo": "050303",
       "nombre": "Comunidad La Piedra - trinchos erosión",

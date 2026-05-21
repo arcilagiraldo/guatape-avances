@@ -99,9 +99,14 @@ const DASHBOARD = {
   _htmlKpis(ps, bs, cs, pct, totalCont, enMeta, alertas) {
     const totalPersonas = this._personas(bs);
     const nVeredas = [...new Set(bs.map(b => b.vereda))].length;
+    const nColectivos  = bs.filter(b => b.tipo_receptor === "colectivo").length;
+    const nIndividuales = bs.filter(b => b.tipo_receptor === "individual").length;
+    const subBenef = nColectivos || nIndividuales
+      ? `${nColectivos} interv. comunitarias · ${nIndividuales} personas naturales · ${nVeredas} veredas`
+      : `${bs.length} registros · ${nVeredas} veredas`;
     const kpis = [
       { ico:"📋", num: ps.length,                              lbl:"Programas",           sub:`🟢 ${enMeta} en meta`,                                        tipo:"programas" },
-      { ico:"👥", num: totalPersonas.toLocaleString("es-CO"),  lbl:"Personas impactadas", sub:`${bs.length} registros · ${nVeredas} veredas`,                tipo:"beneficiarios" },
+      { ico:"👥", num: totalPersonas.toLocaleString("es-CO"),  lbl:"Personas impactadas", sub: subBenef,                tipo:"beneficiarios" },
       { ico:"💰", num: API.fmtPeso(totalCont),          lbl:"Contratado",     sub:`${cs.length} contratos activos`,                tipo:"contratos" },
       { ico: alertas.criticas > 0 ? "⚠️" : "✅",
         num: alertas.criticas > 0 ? alertas.criticas : enMeta,
@@ -352,9 +357,13 @@ const DASHBOARD = {
         </div>`}).join("")}</div>`;
 
     } else if (tipo === "beneficiarios") {
-      const totalP = this._personas(bs);
-      titulo = `👥 ${totalP.toLocaleString("es-CO")} personas · ${bs.length} registros`;
-      html = `<div class="det-tabla">${bs.map(b=>{
+      const totalP    = this._personas(bs);
+      const colectivos   = bs.filter(b => b.tipo_receptor === "colectivo");
+      const individuales = bs.filter(b => b.tipo_receptor === "individual");
+      const pColect  = this._personas(colectivos);
+      const pIndiv   = this._personas(individuales);
+      titulo = `👥 ${totalP.toLocaleString("es-CO")} personas impactadas`;
+      const filaB = b => {
         const per = parseInt(b.personas_representadas)||1;
         return `<div class="det-fila">
           <div style="flex:1;min-width:0">
@@ -363,7 +372,19 @@ const DASHBOARD = {
             ${b.detalle?`<div style="font-size:11px;color:var(--texto-2)">${b.detalle}</div>`:""}
           </div>
           <span style="font-size:11px;color:var(--texto-3);white-space:nowrap">${b.anio||""} Q${b.trimestre||""}</span>
-        </div>`}).join("")}</div>`;
+        </div>`;
+      };
+      html = `
+        ${colectivos.length ? `
+          <div style="font-size:11.5px;font-weight:600;color:var(--marino);margin:8px 0 4px">
+            🏘️ Intervenciones comunitarias (${colectivos.length}) · ${pColect.toLocaleString("es-CO")} personas
+          </div>
+          <div class="det-tabla">${colectivos.map(filaB).join("")}</div>` : ""}
+        ${individuales.length ? `
+          <div style="font-size:11.5px;font-weight:600;color:var(--marino);margin:16px 0 4px">
+            👤 Personas naturales (${individuales.length})
+          </div>
+          <div class="det-tabla">${individuales.map(filaB).join("")}</div>` : ""}`;
 
     } else if (tipo === "contratos") {
       titulo = `💰 ${cs.length} Contratos`;
@@ -468,10 +489,13 @@ const DASHBOARD = {
     const d = this._datos;
     if (!d) { el.textContent = ""; return; }
     const ps         = d.programas?.length||0;
-    const totalPers  = (d.beneficiarios||[]).reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
-    const nRegs      = d.beneficiarios?.length||0;
+    const benefs     = d.beneficiarios||[];
+    const totalPers  = benefs.reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
+    const nColect    = benefs.filter(b=>b.tipo_receptor==="colectivo").length;
+    const nIndiv     = benefs.filter(b=>b.tipo_receptor==="individual").length;
     const secs       = new Set((d.programas||[]).map(p=>p.secretaria)).size;
     const total      = (d.contratos||[]).reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
-    el.textContent   = ps ? `${secs} secretarías · ${ps} programas · ${totalPers} personas (${nRegs} registros) · ${API.fmtPeso(total)}` : "";
+    const regsLabel  = nColect||nIndiv ? `${nColect} interv. comunitarias · ${nIndiv} personas naturales` : `${benefs.length} registros`;
+    el.textContent   = ps ? `${secs} secretarías · ${ps} programas · ${totalPers} personas (${regsLabel}) · ${API.fmtPeso(total)}` : "";
   }
 };

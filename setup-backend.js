@@ -60,10 +60,19 @@ function guardarConfig(cfg) {
 }
 
 function abrirNavegador(url) {
-  const cmd = process.platform === "win32" ? `start "${url}"` :
-              process.platform === "darwin" ? `open "${url}"` :
-              `xdg-open "${url}"`;
-  try { execSync(cmd); } catch (_) {
+  let abierto = false;
+  try {
+    if (process.platform === "win32") {
+      // PowerShell maneja correctamente URLs largas con caracteres especiales
+      execSync(`powershell -Command "Start-Process '${url.replace(/'/g, "''")}'"`);
+    } else if (process.platform === "darwin") {
+      execSync(`open "${url}"`);
+    } else {
+      execSync(`xdg-open "${url}"`);
+    }
+    abierto = true;
+  } catch (_) {}
+  if (!abierto) {
     console.log(`\n   Abre esta URL en tu navegador:\n   ${url}\n`);
   }
 }
