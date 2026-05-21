@@ -99,7 +99,7 @@ const DASHBOARD = {
   _htmlKpis(ps, bs, cs, pct, totalCont, enMeta, alertas) {
     const totalPersonas = this._personas(bs);
     const nVeredas = [...new Set(bs.map(b => b.vereda))].length;
-    const tipoB2 = b => b.tipo_receptor || ((parseInt(b.personas_representadas)||1) > 1 ? "colectivo" : "individual");
+    const tipoB2 = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
     const nColectivos   = bs.filter(b => tipoB2(b) === "colectivo").length;
     const nIndividuales = bs.filter(b => tipoB2(b) === "individual").length;
     const subBenef = nColectivos || nIndividuales
@@ -236,7 +236,7 @@ const DASHBOARD = {
     if (!bs.length) return "";
 
     // tipo_receptor viene de datos_iniciales (local) o se infiere del backend
-    const tipoB = b => b.tipo_receptor || ((parseInt(b.personas_representadas)||1) > 1 ? "colectivo" : "individual");
+    const tipoB = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
     const colectivos   = bs.filter(b => tipoB(b) === "colectivo");
     const individuales = bs.filter(b => tipoB(b) === "individual");
     const pColect      = this._personas(colectivos);
@@ -416,7 +416,7 @@ const DASHBOARD = {
 
     } else if (tipo === "beneficiarios") {
       const totalP    = this._personas(bs);
-      const tipoB = b => b.tipo_receptor || ((parseInt(b.personas_representadas)||1) > 1 ? "colectivo" : "individual");
+      const tipoB = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
       const colectivos   = bs.filter(b => tipoB(b) === "colectivo");
       const individuales = bs.filter(b => tipoB(b) === "individual");
       const pColect  = this._personas(colectivos);
@@ -550,7 +550,7 @@ const DASHBOARD = {
     const ps         = d.programas?.length||0;
     const benefs     = d.beneficiarios||[];
     const totalPers  = benefs.reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
-    const tipoB3 = b => b.tipo_receptor || ((parseInt(b.personas_representadas)||1) > 1 ? "colectivo" : "individual");
+    const tipoB3 = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
     const nColect    = benefs.filter(b=>tipoB3(b)==="colectivo").length;
     const nIndiv     = benefs.filter(b=>tipoB3(b)==="individual").length;
     const secs       = new Set((d.programas||[]).map(p=>p.secretaria)).size;
