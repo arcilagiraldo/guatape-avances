@@ -63,12 +63,23 @@ const BIBLIOTECA = {
   },
 
   _docItem(d) {
-    const esPDF   = d.tipo === "informe_pdf";
-    const icono   = esPDF ? "📄" : "📊";
-    const nombre  = esPDF ? "Informe Ejecutivo PDF" : "Seguimiento PA/PD Excel";
-    const tipo    = esPDF ? "PDF" : "Excel";
-    const color   = esPDF ? "#A32D2D" : "#2D6A4F";
-    const fecha   = API.fmtFecha(d.fecha_subida);
+    const t        = d.tipo || "";
+    const etiqueta = t.startsWith("informe_pdf_") ? t.replace("informe_pdf_","")
+                   : t.startsWith("excel_pa_")    ? t.replace("excel_pa_","")
+                   : t.startsWith("excel_pd_")    ? t.replace("excel_pd_","")
+                   : t.startsWith("soporte_contrato_") ? t.replace("soporte_contrato_","")
+                   : "";
+    const esPDF  = t.startsWith("informe_pdf") || t.startsWith("soporte_contrato");
+    const icono  = esPDF ? "📄" : "📊";
+    const tipo   = esPDF ? "PDF" : "Excel";
+    const color  = esPDF ? "#A32D2D" : "#2D6A4F";
+    const fecha  = API.fmtFecha(d.fecha_subida);
+    let nombre;
+    if      (t.startsWith("informe_pdf"))      nombre = etiqueta ? `Informe Ejecutivo · Prog. ${etiqueta}` : "Informe Ejecutivo PDF";
+    else if (t.startsWith("soporte_contrato")) nombre = etiqueta ? `Soporte de Contrato · ${etiqueta}` : "Soporte de Contrato";
+    else if (t.startsWith("excel_pa"))         nombre = "Seguimiento PA/PD Excel";
+    else if (t.startsWith("excel_pd"))         nombre = "Plan de Desarrollo Excel";
+    else                                        nombre = t.replace(/_/g," ");
 
     return `
       <div style="padding:10px 0;border-bottom:.5px solid rgba(0,0,0,.06);display:flex;align-items:flex-start;gap:10px;">

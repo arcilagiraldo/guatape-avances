@@ -102,7 +102,7 @@ const DASHBOARD = {
     const nColectivos  = bs.filter(b => b.tipo_receptor === "colectivo").length;
     const nIndividuales = bs.filter(b => b.tipo_receptor === "individual").length;
     const subBenef = nColectivos || nIndividuales
-      ? `${nColectivos} interv. comunitarias · ${nIndividuales} personas naturales · ${nVeredas} veredas`
+      ? `${nColectivos} grupos organizados · ${nIndividuales} beneficiarios directos · ${nVeredas} veredas`
       : `${bs.length} registros · ${nVeredas} veredas`;
     const kpis = [
       { ico:"📋", num: ps.length,                              lbl:"Programas",           sub:`🟢 ${enMeta} en meta`,                                        tipo:"programas" },
@@ -233,6 +233,58 @@ const DASHBOARD = {
   // ── Beneficiarios ─────────────────────────────────────────────
   _htmlBeneficiarios(bs, ps) {
     if (!bs.length) return "";
+
+    const colectivos   = bs.filter(b => b.tipo_receptor === "colectivo");
+    const individuales = bs.filter(b => b.tipo_receptor === "individual");
+    const pColect      = this._personas(colectivos);
+
+    // ── Grupos organizados ──
+    const htmlGrupos = colectivos.length ? `
+      <div class="inicio-secs-titulo" style="margin-top:0">
+        🏘️ Grupos organizados
+        <span style="font-size:11px;font-weight:400;color:var(--texto-3)">${colectivos.length} grupos · ${pColect.toLocaleString("es-CO")} personas</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px;">
+        ${colectivos.map(b => {
+          const per = parseInt(b.personas_representadas) || 1;
+          const vCol = (this._config?.veredas?.[b.vereda]||{}).color || "var(--marino)";
+          return `
+            <div onclick="DASHBOARD.mostrarDetalle('beneficiarios')"
+                 style="background:#fff;border:.5px solid rgba(0,0,0,.08);border-radius:10px;
+                        padding:12px 14px;cursor:pointer;transition:box-shadow .15s;"
+                 onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)'"
+                 onmouseout="this.style.boxShadow='none'">
+              <div style="font-size:12px;font-weight:600;color:var(--texto);margin-bottom:4px;line-height:1.35">${b.nombre}</div>
+              <div style="font-size:10.5px;color:var(--texto-3);margin-bottom:6px">${b.tipo_beneficio||""}</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${vCol};flex-shrink:0"></span>
+                <span style="font-size:10.5px;color:var(--texto-2)">${b.vereda}</span>
+                <span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--marino)">👥 ${per}</span>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>` : "";
+
+    // ── Beneficiarios directos ──
+    const htmlIndiv = individuales.length ? `
+      <div class="inicio-secs-titulo">
+        👤 Beneficiarios directos
+        <span style="font-size:11px;font-weight:400;color:var(--texto-3)">${individuales.length} personas</span>
+      </div>
+      <div style="background:#fff;border:.5px solid rgba(0,0,0,.08);border-radius:10px;overflow:hidden;margin-bottom:24px;">
+        ${individuales.map((b,i) => {
+          const borde = i < individuales.length-1 ? "border-bottom:.5px solid rgba(0,0,0,.06)" : "";
+          return `
+            <div style="padding:9px 14px;${borde};display:flex;align-items:center;gap:10px;">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--texto)">${b.nombre}</div>
+                <div style="font-size:10.5px;color:var(--texto-3)">${b.vereda} · ${b.tipo_beneficio||""}</div>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>` : "";
+
+    // ── Personas por vereda ──
     const cnt = {}, prog = {};
     const totalPersonas = this._personas(bs);
     bs.forEach(b => {
@@ -241,11 +293,14 @@ const DASHBOARD = {
       if (!prog[b.vereda]) prog[b.vereda] = new Set();
       prog[b.vereda].add(b.programa_codigo);
     });
-    const vCol   = this._config?.veredas || {};
-    const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+    const vCol     = this._config?.veredas || {};
+    const sorted   = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
     const sinDatos = Object.keys(vCol).filter(n => !cnt[n]);
+
     return `
       <div class="inicio-veredas-wrap">
+        ${htmlGrupos}
+        ${htmlIndiv}
         <div class="inicio-secs-titulo" style="display:flex;align-items:center;gap:8px;">
           Personas impactadas por vereda
           <span style="font-size:11px;font-weight:400;color:var(--texto-3)">${sorted.length} de ${Object.keys(vCol).length || sorted.length} veredas con datos</span>
@@ -377,7 +432,7 @@ const DASHBOARD = {
       html = `
         ${colectivos.length ? `
           <div style="font-size:11.5px;font-weight:600;color:var(--marino);margin:8px 0 4px">
-            🏘️ Intervenciones comunitarias (${colectivos.length}) · ${pColect.toLocaleString("es-CO")} personas
+            🏘️ Grupos organizados (${colectivos.length}) · ${pColect.toLocaleString("es-CO")} personas
           </div>
           <div class="det-tabla">${colectivos.map(filaB).join("")}</div>` : ""}
         ${individuales.length ? `
@@ -495,7 +550,7 @@ const DASHBOARD = {
     const nIndiv     = benefs.filter(b=>b.tipo_receptor==="individual").length;
     const secs       = new Set((d.programas||[]).map(p=>p.secretaria)).size;
     const total      = (d.contratos||[]).reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
-    const regsLabel  = nColect||nIndiv ? `${nColect} interv. comunitarias · ${nIndiv} personas naturales` : `${benefs.length} registros`;
+    const regsLabel  = nColect||nIndiv ? `${nColect} grupos organizados · ${nIndiv} beneficiarios directos` : `${benefs.length} registros`;
     el.textContent   = ps ? `${secs} secretarías · ${ps} programas · ${totalPers} personas (${regsLabel}) · ${API.fmtPeso(total)}` : "";
   }
 };
