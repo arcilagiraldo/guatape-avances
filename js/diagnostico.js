@@ -210,7 +210,7 @@ const DIAGNOSTICO = {
   },
 
   async recalibrarCoords(btn) {
-    if (!confirm("¿Recalibrar todas las ubicaciones aproximadas del mapa?\n\nEsto moverá los marcadores con posición estimada a las coordenadas correctas de cada vereda. Los marcadores con posición exacta (GPS real) no se modifican.")) return;
+    if (!confirm("¿Recalibrar todas las ubicaciones del mapa?\n\nEsto moverá todos los marcadores al centro verificado de su vereda. Úsalo cuando los centros de vereda hayan sido actualizados o los datos muestren ubicaciones incorrectas.")) return;
     const original = btn.textContent;
     btn.textContent = "⏳ Recalibrando..."; btn.disabled = true;
     this._limpiar();
