@@ -43,8 +43,8 @@ const DASHBOARD = {
         : 0;
     const pctPA      = parseFloat(m.pct_pa_reportados) > 0
       ? parseFloat(m.pct_pa_reportados)
-      : psConDatos.length > 0
-        ? parseFloat((psConDatos.reduce((s,p) => s + (parseFloat(p.pct_pa)||0), 0) / psConDatos.length).toFixed(1))
+      : ps.length > 0
+        ? parseFloat((ps.reduce((s,p) => s + (parseFloat(p.pct_pa)||0), 0) / ps.length).toFixed(1))
         : 0;
     const totalCont  = cs.reduce((s,c) => s + (parseFloat(c.valor)||0), 0);
     const enMeta     = ps.filter(p => parseFloat(p.pct_pa) >= 75).length;
@@ -99,8 +99,9 @@ const DASHBOARD = {
   _htmlKpis(ps, bs, cs, pct, totalCont, enMeta, alertas) {
     const totalPersonas = this._personas(bs);
     const nVeredas = [...new Set(bs.map(b => b.vereda))].length;
-    const nColectivos  = bs.filter(b => b.tipo_receptor === "colectivo").length;
-    const nIndividuales = bs.filter(b => b.tipo_receptor === "individual").length;
+    const tipoB2 = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
+    const nColectivos   = bs.filter(b => tipoB2(b) === "colectivo").length;
+    const nIndividuales = bs.filter(b => tipoB2(b) === "individual").length;
     const subBenef = nColectivos || nIndividuales
       ? `${nColectivos} grupos organizados · ${nIndividuales} beneficiarios directos · ${nVeredas} veredas`
       : `${bs.length} registros · ${nVeredas} veredas`;
@@ -234,8 +235,10 @@ const DASHBOARD = {
   _htmlBeneficiarios(bs, ps) {
     if (!bs.length) return "";
 
-    const colectivos   = bs.filter(b => b.tipo_receptor === "colectivo");
-    const individuales = bs.filter(b => b.tipo_receptor === "individual");
+    // tipo_receptor viene de datos_iniciales (local) o se infiere del backend
+    const tipoB = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
+    const colectivos   = bs.filter(b => tipoB(b) === "colectivo");
+    const individuales = bs.filter(b => tipoB(b) === "individual");
     const pColect      = this._personas(colectivos);
 
     // ── Grupos organizados ──
@@ -413,8 +416,9 @@ const DASHBOARD = {
 
     } else if (tipo === "beneficiarios") {
       const totalP    = this._personas(bs);
-      const colectivos   = bs.filter(b => b.tipo_receptor === "colectivo");
-      const individuales = bs.filter(b => b.tipo_receptor === "individual");
+      const tipoB = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
+      const colectivos   = bs.filter(b => tipoB(b) === "colectivo");
+      const individuales = bs.filter(b => tipoB(b) === "individual");
       const pColect  = this._personas(colectivos);
       const pIndiv   = this._personas(individuales);
       titulo = `👥 ${totalP.toLocaleString("es-CO")} personas impactadas`;
@@ -546,8 +550,9 @@ const DASHBOARD = {
     const ps         = d.programas?.length||0;
     const benefs     = d.beneficiarios||[];
     const totalPers  = benefs.reduce((s,b)=>s+(parseInt(b.personas_representadas)||1),0);
-    const nColect    = benefs.filter(b=>b.tipo_receptor==="colectivo").length;
-    const nIndiv     = benefs.filter(b=>b.tipo_receptor==="individual").length;
+    const tipoB3 = b => b.tipo_receptor || (/^(jac |junta|acueducto|comunidad|asociaci|iensp|instituci|colegio|escuela)/i.test(b.nombre||"") ? "colectivo" : "individual");
+    const nColect    = benefs.filter(b=>tipoB3(b)==="colectivo").length;
+    const nIndiv     = benefs.filter(b=>tipoB3(b)==="individual").length;
     const secs       = new Set((d.programas||[]).map(p=>p.secretaria)).size;
     const total      = (d.contratos||[]).reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
     const regsLabel  = nColect||nIndiv ? `${nColect} grupos organizados · ${nIndiv} beneficiarios directos` : `${benefs.length} registros`;
